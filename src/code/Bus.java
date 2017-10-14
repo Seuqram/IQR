@@ -16,10 +16,20 @@ public class Bus {
 	 * @param line - Object from Line class
 	 */
 	public Bus(String identifier, Line line) {
-		super();
 		this.identifier = identifier;
 		this.line = line;
 		this.position = new Point(0, 0);
+	}
+	
+	/**
+	 * Constructor to create bus not related to any line
+	 * 
+	 * @param identifier - Unique string to identify bus
+	 */
+	public Bus(String identifier){
+		this.identifier = identifier;
+		this.line = null;
+		this.position = null;
 	}
 
 	public String getIdentifier() {
