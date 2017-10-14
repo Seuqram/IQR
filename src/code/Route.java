@@ -4,31 +4,21 @@ package code;
  * Represents a square route. The bus must pass through 4 limit points:
  * (0,0) (0,xMax) (xMax, yMax) (0, yMax)
  * @author Rodrigo
- *
+ * 
  */
 public class Route {
-	private Point xMax;
-	private Point yMax;
+	private Point max;
 
-	public Route(Point xMax, Point yMax) {
+	public Route(Point max) {
 		super();
-		this.xMax = xMax;
-		this.yMax = yMax;
+		this.max = max;
 	}
-	
-	public Point getxMax() {
-		return xMax;
+
+	public Point getMax() {
+		return max;
 	}
-	public void setxMax(Point xMax) {
-		this.xMax = xMax;
+
+	public void setMax(Point max) {
+		this.max = max;
 	}
-	public Point getyMax() {
-		return yMax;
-	}
-	public void setyMax(Point yMax) {
-		this.yMax = yMax;
-	}
-	
-	
-	
 }
