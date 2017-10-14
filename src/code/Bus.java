@@ -1,10 +1,20 @@
 package code;
 
+/**
+ * Represents a bus
+ * @author rodri
+ *
+ */
 public class Bus {
 	private String identifier;
 	private Line line;
 	private Point position;
 	
+	/**
+	 * 
+	 * @param identifier - Unique string to identify bus
+	 * @param line - Object from Line class
+	 */
 	public Bus(String identifier, Line line) {
 		super();
 		this.identifier = identifier;
