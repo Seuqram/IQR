@@ -29,7 +29,7 @@ public class Bus {
 	public Bus(String identifier){
 		this.identifier = identifier;
 		this.line = null;
-		this.position = null;
+		this.position = new Point(0, 0);
 	}
 
 	public String getIdentifier() {
@@ -44,8 +44,28 @@ public class Bus {
 		this.line = line;
 	}
 
+	/**
+	 * 
+	 * @return the point that represents the bus position
+	 */
 	public Point getPosition() {
 		return position;
 	}	
+	
+	public boolean move(float x, float y){
+		if (isValidMove(x, y)){
+			this.position.setX(this.position.getX() + x);
+			this.position.setY(this.position.getY() + y);
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean isValidMove(float x, float y){
+		if (this.getPosition().getX() + x <= this.getLine().getRoute().getMax().getX())
+			if (this.getPosition().getY() + y <= this.getLine().getRoute().getMax().getY())
+				return true;
+		return false;
+	}
 	
 }
