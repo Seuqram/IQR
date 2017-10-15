@@ -21,6 +21,10 @@ public class Line {
 		this.number = number;
 	}
 	
+	/**
+	 * 
+	 * @return the object that refers to the line's route
+	 */
 	public Route getRoute(){
 		return route;
 	}
