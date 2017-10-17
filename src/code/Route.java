@@ -9,6 +9,10 @@ package code;
 public class Route {
 	private Point max;
 
+	/**
+	 * 
+	 * @param max point that represents the edges of the route
+	 */
 	public Route(Point max) {
 		super();
 		this.max = max;
