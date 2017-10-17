@@ -1,33 +1,23 @@
 package code;
 
-public class Line {
+public class Line
+{
 	private int number;
 	private Route route;
 
-	/**
-	 * 
-	 * @param number that represents the line number
-	 */
-	public Line(int number, Route route) {
-		this.route = route;
+	public Line(int number)
+	{
 		this.number = number;
+		this.route = new Route();
 	}
 
-	public int getNumber() {
+	public int getNumber()
+	{
 		return number;
 	}
 
-	public void setNumber(int number) {
-		this.number = number;
-	}
-	
-	/**
-	 * 
-	 * @return the object that refers to the line's route
-	 */
-	public Route getRoute(){
+	public Route getRoute()
+	{
 		return route;
 	}
-	
-	
 }

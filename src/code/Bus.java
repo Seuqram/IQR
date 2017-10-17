@@ -2,145 +2,155 @@ package code;
 
 /**
  * Represents a bus
+ * 
  * @author rodri
  *
  */
-
-
-public class Bus {
-	public enum BUSLOCATION {
-		TOP, LEFT, RIGHT, BOTTON
-	}
-	
+public class Bus
+{
 	private String identifier;
 	private Line line;
 	private Point position;
-	private BUSLOCATION location;
-	
+
 	/**
 	 * 
-	 * @param identifier - Unique string to identify bus
-	 * @param line - Object from Line class
+	 * @param identifier
+	 *            - Unique string to identify bus
+	 * @param line
+	 *            - Object from Line class
 	 */
-	public Bus(String identifier, Line line) {
+	public Bus(String identifier, Line line)
+	{
 		this.identifier = identifier;
 		this.line = line;
-		this.position = new Point(0, 0);
-		this.location = BUSLOCATION.BOTTON;
+		
+		float latitude = line.getRoute().getPoint(0).getLatitude();
+		float longitude = line.getRoute().getPoint(0).getLongitude();
+		this.position = new Point(latitude, longitude);
 	}
 
-	public String getIdentifier() {
+	public String getIdentifier()
+	{
 		return identifier;
 	}
 
-	public Line getLine() {
+	public Line getLine()
+	{
 		return line;
-	}
-
-	public void setLine(Line line) {
-		this.line = line;
 	}
 
 	/**
 	 * 
 	 * @return the point that represents the bus position
 	 */
-	public Point getPosition() {
+	public Point getPosition()
+	{
 		return position;
-	}	
-	
-	public BUSLOCATION getLocation(){
-		return location;
 	}
-	
-	public boolean move(float x, float y){
-		float busX = this.position.getX();
-		float busY = this.position.getY();
-		float maxX = this.getLine().getRoute().getMax().getX();
-		float maxY = this.getLine().getRoute().getMax().getY();
-		if (isValidMove(x, y)){
-			if (isOnBottonOrLeftLocation()){
-				this.position.setX(busX + x);
-				this.position.setY(busY + y);
-				this.location = getBusLocationBasedOnPosition();
-				/* IF THE MOVE CHANGES THE POSITION AND KEEP MOVING THE NEW POSITION
-				*  IS EQUAL: ACTUAL_POSITION + MOVEMENT - LIMIT 
-				*/
-				if (busX + x > maxX){
-					this.position.setX((busX + x) - (this.getLine().getRoute().getMax().getX()));
-				}
-				
-				if (this.location == BUSLOCATION.TOP){
-					if (busY + y >= maxY){
-						if (busX + x > maxX){
-							this.position.setX(maxX - x);
-						}
-					}
-				}
-				return true;
-			}else{
-				this.position.setX(busX - x);
-				this.position.setY(busY - y);
-				this.location = getBusLocationBasedOnPosition();
-				return true;
-			}
-		}
+
+	public boolean move(float distance)
+	{
+//		float busX = this.position.getLatitude();
+//		float busY = this.position.getLongitude();
+//		float maxX = this.getLine().getRoute().getMax().getLatitude();
+//		float maxY = this.getLine().getRoute().getMax().getLongitude();
+//		if (isValidMove(x, y))
+//		{
+//			if (isOnBottonOrLeftLocation())
+//			{
+//				this.position.setLatitude(busX + x);
+//				this.position.setLongitude(busY + y);
+//				this.location = getBusLocationBasedOnPosition();
+//				/*
+//				 * IF THE MOVE CHANGES THE POSITION AND KEEP MOVING THE NEW
+//				 * POSITION IS EQUAL: ACTUAL_POSITION + MOVEMENT - LIMIT
+//				 */
+//				if (busX + x > maxX)
+//				{
+//					this.position.setLatitude((busX + x)
+//							- (this.getLine().getRoute().getMax().getLatitude()));
+//				}
+//
+//				if (this.location == BUSLOCATION.TOP)
+//				{
+//					if (busY + y >= maxY)
+//					{
+//						if (busX + x > maxX)
+//						{
+//							this.position.setLatitude(maxX - x);
+//						}
+//					}
+//				}
+//				return true;
+//			} else
+//			{
+//				this.position.setLatitude(busX - x);
+//				this.position.setLongitude(busY - y);
+//				this.location = getBusLocationBasedOnPosition();
+//				return true;
+//			}
+//		}
 		return false;
 	}
-	
-	private boolean isValidMove(float x, float y){
-		float busX = this.position.getX();
-		float busY = this.position.getY();
-		float maxX = this.getLine().getRoute().getMax().getX();
-		float maxY = this.getLine().getRoute().getMax().getY();
-		
-		if (this.location == BUSLOCATION.BOTTON){
-			if (y > 0){
-				if (busX + x < maxX)
-					return false;
-			}
-		}
-		if (isOnBottonOrLeftLocation()){ 
-			if ((x == 0) || (y == 0)){
-				if (busX + x <= this.getLine().getRoute().getMax().getX()) 
-					if (busY + y <= this.getLine().getRoute().getMax().getY())
-						return true;
-			}else
-				if ((busX + x == this.getLine().getRoute().getMax().getX()) ||
-						(busY + y == this.getLine().getRoute().getMax().getY()))
-					return true;
-		}else{
-			if ((x == 0) || (y == 0)){
-				if (busX - x >= 0)
-					if (busY - y >= 0)
-						return true;
-			}else
-				if ((busX - x == 0) || (busY - y == 0))
-					return true;
-		}
-		return false;
-	}
-	
-	private BUSLOCATION getBusLocationBasedOnPosition(){
-		float BusX = this.position.getX();
-		float BusY = this.position.getY();
-		float MaxX = this.getLine().getRoute().getMax().getX();
-		float MaxY = this.getLine().getRoute().getMax().getY();
-		
-		if ((BusY == MaxY) && (BusX != 0))
-			return BUSLOCATION.TOP;
-		else
-			if ((BusY != 0) && (BusX == 0))
-				return BUSLOCATION.RIGHT;
-			else
-				if ((BusY == 0) && (BusX != MaxX))
-					return BUSLOCATION.BOTTON;
-				else
-					return BUSLOCATION.LEFT;
-	}
-	
-	private boolean isOnBottonOrLeftLocation(){
-		return ((this.location == BUSLOCATION.BOTTON) || (this.location == BUSLOCATION.LEFT));
-	}
-	
+
+//	private boolean isValidMove(float x, float y)
+//	{
+//		float busX = this.position.getLatitude();
+//		float busY = this.position.getLongitude();
+//		float maxX = this.getLine().getRoute().getMax().getLatitude();
+//		float maxY = this.getLine().getRoute().getMax().getLongitude();
+//
+//		if (this.location == BUSLOCATION.BOTTON)
+//		{
+//			if (y > 0)
+//			{
+//				if (busX + x < maxX)
+//					return false;
+//			}
+//		}
+//		if (isOnBottonOrLeftLocation())
+//		{
+//			if ((x == 0) || (y == 0))
+//			{
+//				if (busX + x <= this.getLine().getRoute().getMax().getLatitude())
+//					if (busY + y <= this.getLine().getRoute().getMax().getLongitude())
+//						return true;
+//			} else if ((busX + x == this.getLine().getRoute().getMax().getLatitude())
+//					|| (busY + y == this.getLine().getRoute().getMax().getLongitude()))
+//				return true;
+//		} else
+//		{
+//			if ((x == 0) || (y == 0))
+//			{
+//				if (busX - x >= 0)
+//					if (busY - y >= 0)
+//						return true;
+//			} else if ((busX - x == 0) || (busY - y == 0))
+//				return true;
+//		}
+//		return false;
+//	}
+//
+//	private BUSLOCATION getBusLocationBasedOnPosition()
+//	{
+//		float BusX = this.position.getLatitude();
+//		float BusY = this.position.getLongitude();
+//		float MaxX = this.getLine().getRoute().getMax().getLatitude();
+//		float MaxY = this.getLine().getRoute().getMax().getLongitude();
+//
+//		if ((BusY == MaxY) && (BusX != 0))
+//			return BUSLOCATION.TOP;
+//		else if ((BusY != 0) && (BusX == 0))
+//			return BUSLOCATION.RIGHT;
+//		else if ((BusY == 0) && (BusX != MaxX))
+//			return BUSLOCATION.BOTTON;
+//		else
+//			return BUSLOCATION.LEFT;
+//	}
+//
+//	private boolean isOnBottonOrLeftLocation()
+//	{
+//		return ((this.location == BUSLOCATION.BOTTON)
+//				|| (this.location == BUSLOCATION.LEFT));
+//	}
 }

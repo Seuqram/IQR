@@ -1,28 +1,36 @@
 package code;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Represents a square route. The bus must pass through 4 limit points:
- * (0,0) (0,xMax) (xMax, yMax) (0, yMax)
+ * Represents a square route. The bus must pass through 4 limit points: (0,0)
+ * (0,xMax) (xMax, yMax) (0, yMax)
+ * 
  * @author Rodrigo
  * 
  */
-public class Route {
-	private Point max;
+public class Route
+{
+	private List<Point> points;
 
-	/**
-	 * 
-	 * @param max point that represents the edges of the route
-	 */
-	public Route(Point max) {
-		super();
-		this.max = max;
+	public Route()
+	{
+		this.points = new ArrayList<Point>();
 	}
 
-	public Point getMax() {
-		return max;
+	public void addPoint(float latitude, float longitude)
+	{
+		this.points.add(new Point(latitude, longitude));
+	}
+	
+	public int size()
+	{
+		return points.size();
 	}
 
-	public void setMax(Point max) {
-		this.max = max;
+	public Point getPoint(int index)
+	{
+		return this.points.get(index);
 	}
 }

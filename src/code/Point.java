@@ -1,27 +1,33 @@
 package code;
 
-public class Point {
-	private float x;
-	private float y;
-	
-	
-	public Point(float x, float y) {
-		this.x = x;
-		this.y = y;
+public class Point
+{
+	private float latitude;
+	private float longitude;
+
+	public Point(float latitude, float longitude)
+	{
+		this.latitude = latitude;
+		this.longitude = longitude;
 	}
-	
-	public float getX() {
-		return x;
+
+	public float getLatitude()
+	{
+		return latitude;
 	}
-	public void setX(float x) {
-		this.x = x;
+
+	public void setLatitude(float latitude)
+	{
+		this.latitude = latitude;
 	}
-	public float getY() {
-		return y;
+
+	public float getLongitude()
+	{
+		return longitude;
 	}
-	public void setY(float y) {
-		this.y = y;
+
+	public void setLongitude(float longitude)
+	{
+		this.longitude = longitude;
 	}
-	
-	
 }
