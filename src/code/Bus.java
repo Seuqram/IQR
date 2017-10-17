@@ -5,10 +5,17 @@ package code;
  * @author rodri
  *
  */
+
+
 public class Bus {
+	public enum BUSLOCATION {
+		TOP, LEFT, RIGHT, BOTTON
+	}
+	
 	private String identifier;
 	private Line line;
 	private Point position;
+	private BUSLOCATION location;
 	
 	/**
 	 * 
@@ -19,17 +26,7 @@ public class Bus {
 		this.identifier = identifier;
 		this.line = line;
 		this.position = new Point(0, 0);
-	}
-	
-	/**
-	 * Constructor to create bus not related to any line
-	 * 
-	 * @param identifier - Unique string to identify bus
-	 */
-	public Bus(String identifier){
-		this.identifier = identifier;
-		this.line = null;
-		this.position = new Point(0, 0);
+		this.location = BUSLOCATION.BOTTON;
 	}
 
 	public String getIdentifier() {
@@ -52,20 +49,73 @@ public class Bus {
 		return position;
 	}	
 	
+	public BUSLOCATION getLocation(){
+		return location;
+	}
+	
 	public boolean move(float x, float y){
+		float busX = this.position.getX();
+		float busY = this.position.getY();
 		if (isValidMove(x, y)){
-			this.position.setX(this.position.getX() + x);
-			this.position.setY(this.position.getY() + y);
-			return true;
+			if (isOnBottonOrLeftLocation()){
+				this.position.setX(busX + x);
+				this.position.setY(busY + y);
+				this.location = getBusLocationBasedOnPosition();
+				return true;
+			}else{
+				this.position.setX(busX - x);
+				this.position.setY(busY - y);
+				this.location = getBusLocationBasedOnPosition();
+				return true;
+			}
 		}
 		return false;
 	}
 	
 	private boolean isValidMove(float x, float y){
-		if (this.getPosition().getX() + x <= this.getLine().getRoute().getMax().getX())
-			if (this.getPosition().getY() + y <= this.getLine().getRoute().getMax().getY())
-				return true;
+		float busX = this.position.getX();
+		float busY = this.position.getY();
+		if (isOnBottonOrLeftLocation()){ 
+			if ((x == 0) || (y == 0)){
+				if (busX + x <= this.getLine().getRoute().getMax().getX()) 
+					if (busY + y <= this.getLine().getRoute().getMax().getY())
+						return true;
+			}else
+				if ((busX + x == this.getLine().getRoute().getMax().getX()) ||
+						(busY + y == this.getLine().getRoute().getMax().getY()))
+					return true;
+		}else{
+			if ((x == 0) || (y == 0)){
+				if (busX - x >= 0)
+					if (busY - y >= 0)
+						return true;
+			}else
+				if ((busX - x == 0) || (busY - y == 0))
+					return true;
+		}
 		return false;
+	}
+	
+	private BUSLOCATION getBusLocationBasedOnPosition(){
+		float BusX = this.position.getX();
+		float BusY = this.position.getY();
+		float MaxX = this.getLine().getRoute().getMax().getX();
+		float MaxY = this.getLine().getRoute().getMax().getY();
+		
+		if ((BusY == MaxY) && (BusX != 0))
+			return BUSLOCATION.TOP;
+		else
+			if ((BusY != 0) && (BusX == 0))
+				return BUSLOCATION.RIGHT;
+			else
+				if ((BusY == 0) && (BusX != MaxX))
+					return BUSLOCATION.BOTTON;
+				else
+					return BUSLOCATION.LEFT;
+	}
+	
+	private boolean isOnBottonOrLeftLocation(){
+		return ((this.location == BUSLOCATION.BOTTON) || (this.location == BUSLOCATION.LEFT));
 	}
 	
 }
