@@ -56,11 +56,27 @@ public class Bus {
 	public boolean move(float x, float y){
 		float busX = this.position.getX();
 		float busY = this.position.getY();
+		float maxX = this.getLine().getRoute().getMax().getX();
+		float maxY = this.getLine().getRoute().getMax().getY();
 		if (isValidMove(x, y)){
 			if (isOnBottonOrLeftLocation()){
 				this.position.setX(busX + x);
 				this.position.setY(busY + y);
 				this.location = getBusLocationBasedOnPosition();
+				/* IF THE MOVE CHANGES THE POSITION AND KEEP MOVING THE NEW POSITION
+				*  IS EQUAL: ACTUAL_POSITION + MOVEMENT - LIMIT 
+				*/
+				if (busX + x > maxX){
+					this.position.setX((busX + x) - (this.getLine().getRoute().getMax().getX()));
+				}
+				
+				if (this.location == BUSLOCATION.TOP){
+					if (busY + y >= maxY){
+						if (busX + x > maxX){
+							this.position.setX(maxX - x);
+						}
+					}
+				}
 				return true;
 			}else{
 				this.position.setX(busX - x);
@@ -75,6 +91,15 @@ public class Bus {
 	private boolean isValidMove(float x, float y){
 		float busX = this.position.getX();
 		float busY = this.position.getY();
+		float maxX = this.getLine().getRoute().getMax().getX();
+		float maxY = this.getLine().getRoute().getMax().getY();
+		
+		if (this.location == BUSLOCATION.BOTTON){
+			if (y > 0){
+				if (busX + x < maxX)
+					return false;
+			}
+		}
 		if (isOnBottonOrLeftLocation()){ 
 			if ((x == 0) || (y == 0)){
 				if (busX + x <= this.getLine().getRoute().getMax().getX()) 

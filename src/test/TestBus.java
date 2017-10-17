@@ -113,4 +113,40 @@ public class TestBus {
 		assertFalse(bus.move(5, 5));// ASSERT THAT BUS DOES NOT MOVE ON DIAGONAL FROM LEFT
 	}
 	
+	@Test
+	public void testCorrectBug(){
+		//ASSERTS THAT ROUTE LIMITS ARE KNOWN
+		assertEquals(10, bus.getLine().getRoute().getMax().getX(), 0);
+		assertEquals(10, bus.getLine().getRoute().getMax().getY(), 0);
+		
+		assertTrue(bus.move(3, 0));
+		assertFalse(bus.move(0, 4));
+	}
+	
+	@Test
+	public void testCorrectBug2(){
+		//ASSERTS THAT ROUTE LIMITS ARE KNOWN
+		assertEquals(10, bus.getLine().getRoute().getMax().getX(), 0);
+		assertEquals(10, bus.getLine().getRoute().getMax().getY(), 0);
+		
+		assertTrue(bus.move(10, 6));
+		assertEquals(Bus.BUSLOCATION.LEFT, bus.getLocation());
+		assertTrue(bus.move(9, 4));
+		assertEquals(1, bus.getPosition().getX(), 0);
+	}
+	
+	@Test
+	public void testAssertThatBusChangeDirectionWhenMovingBothSides(){
+		//ASSERTS THAT ROUTE LIMITS ARE KNOWN
+		assertEquals(10, bus.getLine().getRoute().getMax().getX(), 0);
+		assertEquals(10, bus.getLine().getRoute().getMax().getY(), 0);
+
+		assertEquals(Bus.BUSLOCATION.BOTTON, bus.getLocation());
+		assertTrue(bus.move(10, 9));
+		assertEquals(Bus.BUSLOCATION.LEFT, bus.getLocation());
+		assertTrue(bus.move(3, 1));
+		assertEquals(Bus.BUSLOCATION.TOP, bus.getLocation());
+		assertEquals(7, bus.getPosition().getX(), 0);
+	}
+	
 }
