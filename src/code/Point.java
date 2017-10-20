@@ -1,33 +1,16 @@
 package code;
 
-public class Point
+import lombok.Data;
+
+/**
+ * Class that represents a point in cartesian plain with
+ * two atributtes, latitude and longitude
+ * @author rodri
+ *
+ */
+public @Data class Point
 {
-	private float latitude;
-	private float longitude;
-
-	public Point(float latitude, float longitude)
-	{
-		this.latitude = latitude;
-		this.longitude = longitude;
-	}
-
-	public float getLatitude()
-	{
-		return latitude;
-	}
-
-	public void setLatitude(float latitude)
-	{
-		this.latitude = latitude;
-	}
-
-	public float getLongitude()
-	{
-		return longitude;
-	}
-
-	public void setLongitude(float longitude)
-	{
-		this.longitude = longitude;
-	}
+	private double latitude;
+	private double longitude;
+	
 }
