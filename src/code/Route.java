@@ -23,13 +23,23 @@ public class Route
 
 	/**
 	 * Method that creates a new point based on doubles latitute and longitude passed
-	 * and add this new point to the list of points of the route
+	 * and add this new point to the list of points of the route.
+	 * <p>
+	 * The point must be unique
 	 * @param double latitude
 	 * @param double longitude
+	 * @return 
 	 */
-	public void addPoint(float latitude, float longitude)
+	public boolean addPoint(double latitude, double longitude)
 	{
+		for (int index = 0; index < this.points.size(); index++) {
+			Point point = this.points.get(index);
+			if (point.getLatitude() == latitude)
+				if (point.getLongitude() == longitude)
+					return false;
+		}
 		this.points.add(new Point(latitude, longitude));
+		return true;
 	}
 	
 	/**
