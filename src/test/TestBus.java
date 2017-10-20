@@ -9,144 +9,32 @@ import org.junit.Test;
 import code.Bus;
 import code.Line;
 import code.Point;
-import code.Route;
 
 public class TestBus {
 
-	Bus bus;
+	Bus testBus;
+	Line testLine;
 	@Before
 	public void setData(){
-		bus = new Bus("id", new Line(107, new Route(new Point(10, 10))));
+		testLine = new Line(107);
+		testLine.getRoute().addPoint(0, 1);
+		testLine.getRoute().addPoint(0, 2);
+		testLine.getRoute().addPoint(0, 3);
+		testBus = new Bus("id", testLine);
 	}
 	
 	@After // tearDown()
 	public void after() throws Exception {
-		bus = null;
+		testBus = null;
 	}
 	
 	@Test
 	public void testNewBusPosition(){
-		Point expectedPoint = new Point(0, 0);
-		assertEquals(expectedPoint.getLatitude(), bus.getPosition().getLatitude(), 0);
-		assertEquals(expectedPoint.getLongitude(), bus.getPosition().getLongitude(), 0);
-	}
-	
-	@Test
-	public void testAssetThatBusMoveThroughRoleRoute(){
-		//ASSERTS THAT ROUTE LIMITS ARE KNOWN
-		assertEquals(10, bus.getLine().getRoute().getMax().getLatitude(), 0);
-		assertEquals(10, bus.getLine().getRoute().getMax().getLongitude(), 0);
-		
-		assertEquals(Bus.BUSLOCATION.BOTTON, bus.getLocation());
-		assertTrue(bus.move(5, 0));
-		assertEquals(Bus.BUSLOCATION.BOTTON, bus.getLocation());
-		assertTrue(bus.move(5, 0));//REACHES END OF BOTTON
-		assertEquals(Bus.BUSLOCATION.LEFT, bus.getLocation());
-		assertTrue(bus.move(0, 5));
-		assertEquals(Bus.BUSLOCATION.LEFT, bus.getLocation());
-		assertTrue(bus.move(0, 5));//REACHES END OF LEFT
-		assertEquals(Bus.BUSLOCATION.TOP, bus.getLocation());
-		assertTrue(bus.move(5, 0));
-		assertEquals(Bus.BUSLOCATION.TOP, bus.getLocation());
-		assertTrue(bus.move(5, 0));//REACHES END OF TOP
-		assertEquals(Bus.BUSLOCATION.RIGHT, bus.getLocation());
-		assertTrue(bus.move(0, 5));
-		assertEquals(Bus.BUSLOCATION.RIGHT, bus.getLocation());
-		assertTrue(bus.move(0, 5));//REACHES END OF RIGHT
-		assertEquals(Bus.BUSLOCATION.BOTTON, bus.getLocation());
-	}
-	
-	@Test
-	public void testAssertThatBusNoGoBeyoundRouteInAnyDirection() {
-		//ASSERTS THAT ROUTE LIMITS ARE KNOWN
-		assertEquals(10, bus.getLine().getRoute().getMax().getLatitude(), 0);
-		assertEquals(10, bus.getLine().getRoute().getMax().getLongitude(), 0);
-		
-		
-		//BUS ON BOTTON DOES NOT GO BEYOND X AXIS
-		assertEquals(Bus.BUSLOCATION.BOTTON, bus.getLocation());
-		assertFalse(bus.move(11, 0));
-		
-		//BUS ON LEFT DOES NOT GO BEYOND Y AXIS
-		assertTrue(bus.move(10, 0));// GOEST TO END OF BOTTOM
-		assertEquals(Bus.BUSLOCATION.LEFT, bus.getLocation());
-		assertFalse(bus.move(0, 11));
-		
-		//BUS ON TOP DOES NOT GO BEYOND X AXIS
-		assertTrue(bus.move(0, 10));// GOEST TO END OF LEFT
-		assertEquals(Bus.BUSLOCATION.TOP, bus.getLocation());
-		assertFalse(bus.move(11, 0));
-		
-		//BUS ON RIGHT DOES NOT GO BEYOND Y AXIS
-		assertTrue(bus.move(10, 0));// GOEST TO END OF TOP
-		assertEquals(Bus.BUSLOCATION.RIGHT, bus.getLocation());
-		assertFalse(bus.move(0, 11));
-	}
-	
-	@Test
-	public void testAssertThatBusMoveInTwoDirections(){
-		//ASSERTS THAT ROUTE LIMITS ARE KNOWN
-		assertEquals(10, bus.getLine().getRoute().getMax().getLatitude(), 0);
-		assertEquals(10, bus.getLine().getRoute().getMax().getLongitude(), 0);
-		assertEquals(Bus.BUSLOCATION.BOTTON, bus.getLocation());
-		assertTrue(bus.move(10, 10));// GOEST TO END OF BOTTOM AND TO END OF LEFT
-		assertEquals(Bus.BUSLOCATION.TOP, bus.getLocation());
-		assertTrue(bus.move(10, 10));// GOEST TO END OF TOP AND TO END OF RIGHT
-		assertEquals(Bus.BUSLOCATION.BOTTON, bus.getLocation());
-	}
-	
-	@Test
-	public void testAssertThatBusNoMoveDiagonal(){
-		//ASSERTS THAT ROUTE LIMITS ARE KNOWN
-		assertEquals(10, bus.getLine().getRoute().getMax().getLatitude(), 0);
-		assertEquals(10, bus.getLine().getRoute().getMax().getLongitude(), 0);
-		
-		assertEquals(Bus.BUSLOCATION.BOTTON, bus.getLocation());
-		assertFalse(bus.move(5, 5));// ASSERT THAT BUS DOES NOT MOVE ON DIAGONAL FROM BOTTON
-		
-		assertTrue(bus.move(10, 0));// MOVES BUS TO LEFT
-		assertEquals(Bus.BUSLOCATION.LEFT, bus.getLocation());
-		assertFalse(bus.move(5, 5));// ASSERT THAT BUS DOES NOT MOVE ON DIAGONAL FROM LEFT
-		
-		assertTrue(bus.move(0, 10));// MOVES BUS TO LEFT
-		assertEquals(Bus.BUSLOCATION.TOP, bus.getLocation());
-		assertFalse(bus.move(5, 5));// ASSERT THAT BUS DOES NOT MOVE ON DIAGONAL FROM LEFT
-	}
-	
-	@Test
-	public void testCorrectBug(){
-		//ASSERTS THAT ROUTE LIMITS ARE KNOWN
-		assertEquals(10, bus.getLine().getRoute().getMax().getLatitude(), 0);
-		assertEquals(10, bus.getLine().getRoute().getMax().getLongitude(), 0);
-		
-		assertTrue(bus.move(3, 0));
-		assertFalse(bus.move(0, 4));
-	}
-	
-	@Test
-	public void testCorrectBug2(){
-		//ASSERTS THAT ROUTE LIMITS ARE KNOWN
-		assertEquals(10, bus.getLine().getRoute().getMax().getLatitude(), 0);
-		assertEquals(10, bus.getLine().getRoute().getMax().getLongitude(), 0);
-		
-		assertTrue(bus.move(10, 6));
-		assertEquals(Bus.BUSLOCATION.LEFT, bus.getLocation());
-		assertTrue(bus.move(9, 4));
-		assertEquals(1, bus.getPosition().getLatitude(), 0);
-	}
-	
-	@Test
-	public void testAssertThatBusChangeDirectionWhenMovingBothSides(){
-		//ASSERTS THAT ROUTE LIMITS ARE KNOWN
-		assertEquals(10, bus.getLine().getRoute().getMax().getLatitude(), 0);
-		assertEquals(10, bus.getLine().getRoute().getMax().getLongitude(), 0);
-
-		assertEquals(Bus.BUSLOCATION.BOTTON, bus.getLocation());
-		assertTrue(bus.move(10, 9));
-		assertEquals(Bus.BUSLOCATION.LEFT, bus.getLocation());
-		assertTrue(bus.move(3, 1));
-		assertEquals(Bus.BUSLOCATION.TOP, bus.getLocation());
-		assertEquals(7, bus.getPosition().getLatitude(), 0);
+		Point expectedPoint = new Point(
+				testLine.getRoute().getPointAtIndex(0).getLatitude(), 
+				testLine.getRoute().getPointAtIndex(0).getLongitude());
+		assertEquals(expectedPoint.getLatitude(), testBus.getPosition().getLatitude(), 0);
+		assertEquals(expectedPoint.getLongitude(), testBus.getPosition().getLongitude(), 0);
 	}
 	
 }

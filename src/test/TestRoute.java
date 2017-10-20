@@ -11,36 +11,36 @@ import code.Route;
 
 public class TestRoute {
 
-	Route route;
+	Route testRoute;
 	@Before
 	public void setData(){
-		route = new Route();
+		testRoute = new Route();
 	}
 	
 	@After // tearDown()
 	public void after() throws Exception {
-		route = null;
+		testRoute = null;
 	}
 	
 	@Test
 	public void testAddPoint() {
 		Point expectedPoint = new Point(0, 0);
-		assertEquals(0, route.getPointsQuantity());
-		assertTrue(route.addPoint(expectedPoint.getLatitude(), expectedPoint.getLongitude()));
-		assertEquals(1, route.getPointsQuantity());
-		assertEquals(expectedPoint.getLatitude(), route.getPointAtIndex(0).getLatitude(), 0);
-		assertEquals(expectedPoint.getLongitude(), route.getPointAtIndex(0).getLongitude(), 0);
+		assertEquals(0, testRoute.getPointsQuantity());
+		assertTrue(testRoute.addPoint(expectedPoint.getLatitude(), expectedPoint.getLongitude()));
+		assertEquals(1, testRoute.getPointsQuantity());
+		assertEquals(expectedPoint.getLatitude(), testRoute.getPointAtIndex(0).getLatitude(), 0);
+		assertEquals(expectedPoint.getLongitude(), testRoute.getPointAtIndex(0).getLongitude(), 0);
 	}
 	
 	@Test
 	public void assertThatRouteDoesNotHaveTwoEqualsPoint() {
 		Point testPoint = new Point(0, 0);
-		assertEquals(0, route.getPointsQuantity());
-		assertTrue(route.addPoint(testPoint.getLatitude(), testPoint.getLongitude()));
-		assertEquals(1, route.getPointsQuantity());
-		assertEquals(testPoint.getLatitude(), route.getPointAtIndex(0).getLatitude(), 0);
-		assertEquals(testPoint.getLongitude(), route.getPointAtIndex(0).getLongitude(), 0);
-		assertFalse(route.addPoint(testPoint.getLatitude(), testPoint.getLongitude()));
+		assertEquals(0, testRoute.getPointsQuantity());
+		assertTrue(testRoute.addPoint(testPoint.getLatitude(), testPoint.getLongitude()));
+		assertEquals(1, testRoute.getPointsQuantity());
+		assertEquals(testPoint.getLatitude(), testRoute.getPointAtIndex(0).getLatitude(), 0);
+		assertEquals(testPoint.getLongitude(), testRoute.getPointAtIndex(0).getLongitude(), 0);
+		assertFalse(testRoute.addPoint(testPoint.getLatitude(), testPoint.getLongitude()));
 	}
 
 }
