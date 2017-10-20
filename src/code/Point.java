@@ -1,6 +1,8 @@
 package code;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Class that represents a point in cartesian plain with
@@ -8,7 +10,9 @@ import lombok.Data;
  * @author rodri
  *
  */
-public @Data class Point
+
+@Getter @Setter @AllArgsConstructor
+public class Point
 {
 	private double latitude;
 	private double longitude;
