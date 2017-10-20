@@ -17,4 +17,13 @@ public class Point
 	private double latitude;
 	private double longitude;
 	
+	public int getDistanceToPoint(double latitude, double longitude) {
+		//FORMULA: X^2 = ((xa - xb)^2 + (ya - yb)^2)^(1/2)
+		int distance = (int)Math.sqrt(
+				(Math.pow(this.latitude - latitude, 2.0)
+						+
+				 Math.pow(this.longitude - longitude,  2.0)));
+		return distance;
+	}
+	
 }
