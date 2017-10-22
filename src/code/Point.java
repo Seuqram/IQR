@@ -26,4 +26,27 @@ public class Point
 		return distance;
 	}
 	
+	public static Point calculatePoint(int distance, Point startPoint, Point endPoint){
+		double hypotenuse = startPoint.getDistanceToPoint(endPoint.getLatitude(), endPoint.getLongitude());
+		if (hypotenuse < distance)
+			return startPoint;
+		double oppositeLeg = endPoint.getLatitude();
+		double adjacentLeg = endPoint.getLongitude();		
+		double newHypotenuse = distance;
+		
+		if (startPoint.getLatitude() > endPoint.getLatitude()){
+			if (startPoint.getLongitude() > endPoint.getLongitude()){
+				newHypotenuse = hypotenuse - distance;
+				oppositeLeg = startPoint.getLatitude();
+				adjacentLeg = startPoint.getLongitude();
+			}
+		}
+		double sin = oppositeLeg / hypotenuse;
+		double cosin = adjacentLeg / hypotenuse;
+		double newOppositeLeg = sin * newHypotenuse;
+		double newAdjacentLeg = cosin * newHypotenuse;
+		Point point = new Point(newOppositeLeg, newAdjacentLeg);
+		return point;
+	}
+	
 }
