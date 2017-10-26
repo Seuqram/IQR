@@ -46,13 +46,13 @@ public class Point
 				double newAdjacentLeg = 0;
 				if (startPoint.getLatitude() < endPoint.getLatitude()){
 					double proportionalLatitude = endPoint.getLatitude() - startPoint.getLatitude();
-					double patata = (proportionalLatitude * distance) / distanceBetweenPoints;
-					newOppositeLeg = patata + startPoint.getLatitude();
+					double auxiliarDouble = (proportionalLatitude * distance) / distanceBetweenPoints;
+					newOppositeLeg = auxiliarDouble + startPoint.getLatitude();
 				}
 				if (startPoint.getLatitude() > endPoint.getLatitude()){
 					double proportionalLatitude = startPoint.getLatitude() - endPoint.getLatitude();
-					double patata = (proportionalLatitude * distance) / distanceBetweenPoints;
-					newOppositeLeg = startPoint.getLatitude() - patata;
+					double auxiliarDouble = (proportionalLatitude * distance) / distanceBetweenPoints;
+					newOppositeLeg = startPoint.getLatitude() - auxiliarDouble;
 				}
 				if (startPoint.getLongitude() < endPoint.getLongitude()){
 					double proportionalLongitude = endPoint.getLongitude() - startPoint.getLongitude();
@@ -61,8 +61,8 @@ public class Point
 				}
 				if (startPoint.getLongitude() > endPoint.getLongitude()){
 					double proportionalLongitude = startPoint.getLongitude() - endPoint.getLongitude();
-					double patati = (proportionalLongitude* distance) / distanceBetweenPoints;
-					newAdjacentLeg = startPoint.getLongitude() - patati;
+					double auxiliarDouble = (proportionalLongitude* distance) / distanceBetweenPoints;
+					newAdjacentLeg = startPoint.getLongitude() - auxiliarDouble;
 				}
 				resultPoint = new Point(newOppositeLeg, newAdjacentLeg);
 			}
