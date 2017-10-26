@@ -82,7 +82,10 @@ public class Route
 	}
 	
 	public Point getNextPoint(Point referencePoint) {
-		int nextPointIndex = this.getIndexOfPoint(referencePoint) + 1;
+		int referencePointIndex = this.getIndexOfPoint(referencePoint);
+		if (referencePointIndex == this.getPointsQuantity() - 1)
+			return this.points.get(0);
+		int nextPointIndex = referencePointIndex + 1;
 		return this.points.get(nextPointIndex);
 	}
 }
