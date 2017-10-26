@@ -97,5 +97,14 @@ public class TestRoute {
 		assertEquals(2, testRoute.getPointsQuantity());
 		assertTrue(secondTestPoint.equals(testRoute.getNextPoint(firstTestPoint)));
 	}
+	
+	@Test
+	public void testGetRouteSize() {
+		testRoute.addPoint(0, 1);
+		testRoute.addPoint(0, 4);
+		testRoute.addPoint(0, 8);
+		testRoute.addPoint(0, 12);
+		assertEquals(22, testRoute.getSize());
+	}
 
 }

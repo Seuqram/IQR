@@ -88,4 +88,13 @@ public class Route
 		int nextPointIndex = referencePointIndex + 1;
 		return this.points.get(nextPointIndex);
 	}
+	
+	public int getSize() {
+		int size = 0;
+		for (int index = 0; index < this.getPointsQuantity(); index++) {
+			Point point = this.points.get(index);
+			size = size + point.getDistanceToPoint(this.getNextPoint(point));
+		}
+		return size;
+	}
 }
