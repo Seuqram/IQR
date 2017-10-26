@@ -106,5 +106,55 @@ public class TestRoute {
 		testRoute.addPoint(0, 12);
 		assertEquals(22, testRoute.getSize());
 	}
+	
+	@Test
+	public void testGetBusesDistanceSamePosition() {
+		Line testLine = new Line(107);
+		Route busesRoute = testLine.getRoute();
+		busesRoute.addPoint(0, 1);
+		busesRoute.addPoint(0, 4);
+		busesRoute.addPoint(0, 8);
+		busesRoute.addPoint(0, 12);
+		Bus busOne = new Bus("1", testLine);
+		Bus busTwo = new Bus("2", testLine);
+		assertEquals(0, busesRoute.getDistanceBetweenBuses(busOne, busTwo));
+	}
+	
+	@Test
+	public void testGetBusesDistanceBeetweenSamePoints() {
+		Line testLine = new Line(107);
+		Route busesRoute = testLine.getRoute();
+		busesRoute.addPoint(0, 1);
+		busesRoute.addPoint(0, 4);
+		busesRoute.addPoint(0, 8);
+		busesRoute.addPoint(0, 12);
+		Bus busOne = new Bus("1", testLine);
+		Bus busTwo = new Bus("2", testLine);
+		assertTrue(busOne.move(2));
+		assertTrue(busOne.getCurrentPosition().equals(0, 3));
+		assertTrue(busTwo.getCurrentPosition().equals(busesRoute.getPointAtIndex(0)));
+		assertEquals(2, busesRoute.getDistanceBetweenBuses(busOne, busTwo));
+	}
+	
+	@Test
+	public void testGetBusesDistanceApartByOnePoint() {
+		Line testLine = new Line(107);
+		Route busesRoute = testLine.getRoute();
+		busesRoute.addPoint(0, 1);
+		busesRoute.addPoint(1, 4);
+		busesRoute.addPoint(2, 8);
+		busesRoute.addPoint(3, 12);
+		Bus busOne = new Bus("1", testLine);
+		Bus busTwo = new Bus("2", testLine);
+		assertTrue(busOne.move(4));
+		assertTrue(busOne.getCurrentPosition().equals(1.25, 5));
+		assertTrue(busTwo.getCurrentPosition().equals(busesRoute.getPointAtIndex(0)));
+		assertEquals(4, busesRoute.getDistanceBetweenBuses(busOne, busTwo));
+	}
+	
+	//TODO
+	@Test
+	public void testGetBusesDistanceApartByMoreThenPoint() {
+	}
 
 }
