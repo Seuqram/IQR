@@ -31,8 +31,12 @@ public class Point
 	}
 	
 	public boolean equals(Point givenPoint) {
-		if (this.getLatitude() == givenPoint.getLatitude())
-			if(this.getLongitude() == givenPoint.getLongitude())
+		return this.equals(givenPoint.getLatitude(), givenPoint.getLongitude());
+	}
+	
+	public boolean equals(double givenLatitude, double givenLongitude) {
+		if (this.getLatitude() == givenLatitude)
+			if(this.getLongitude() == givenLongitude)
 				return true;
 		return false;
 	}
