@@ -17,6 +17,10 @@ public class Point
 	private double latitude;
 	private double longitude;
 	
+	public int getDistanceToPoint(Point givenPoint) {
+		return this.getDistanceToPoint(givenPoint.getLatitude(), givenPoint.getLongitude());
+	}
+	
 	public int getDistanceToPoint(double latitude, double longitude) {
 		//FORMULA: X^2 = ((xa - xb)^2 + (ya - yb)^2)^(1/2)
 		int distance = (int)Math.sqrt(
@@ -24,6 +28,13 @@ public class Point
 						+
 				 Math.pow(this.longitude - longitude,  2.0)));
 		return distance;
+	}
+	
+	public boolean equals(Point givenPoint) {
+		if (this.getLatitude() == givenPoint.getLatitude())
+			if(this.getLongitude() == givenPoint.getLongitude())
+				return true;
+		return false;
 	}
 	
 	public static Point calculatePoint(int distance, Point startPoint, Point endPoint){
