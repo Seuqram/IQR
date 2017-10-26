@@ -20,6 +20,15 @@ public class Route
 	{
 		this.points = new ArrayList<>();
 	}
+	
+	/**
+	 * Method that adds a new point to the route based on a given point
+	 * @param point
+	 * @return
+	 */
+	public boolean addPoint(Point point) {
+		return this.addPoint(point.getLatitude(), point.getLongitude());
+	}
 
 	/**
 	 * Method that creates a new point based on doubles latitute and longitude passed
@@ -61,5 +70,19 @@ public class Route
 		//return a copy of the point not the reference to the point
 		Point point = this.points.get(index); 
 		return point;
+	}
+	
+	public int getIndexOfPoint(Point givenPoint) {
+		for (int index = 0; index < this.points.size(); index++) {
+			Point point = this.points.get(index);
+			if (point.equals(givenPoint))
+				return index;
+		}
+		return 0;
+	}
+	
+	public Point getNextPoint(Point referencePoint) {
+		int nextPointIndex = this.getIndexOfPoint(referencePoint) + 1;
+		return this.points.get(nextPointIndex);
 	}
 }
