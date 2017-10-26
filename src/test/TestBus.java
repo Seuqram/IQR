@@ -33,8 +33,8 @@ public class TestBus {
 		Point expectedPoint = new Point(
 				testLine.getRoute().getPointAtIndex(0).getLatitude(), 
 				testLine.getRoute().getPointAtIndex(0).getLongitude());
-		assertEquals(expectedPoint.getLatitude(), testBus.getPosition().getLatitude(), 0);
-		assertEquals(expectedPoint.getLongitude(), testBus.getPosition().getLongitude(), 0);
+		assertEquals(expectedPoint.getLatitude(), testBus.getCurrentPosition().getLatitude(), 0);
+		assertEquals(expectedPoint.getLongitude(), testBus.getCurrentPosition().getLongitude(), 0);
 	}
 	
 }
