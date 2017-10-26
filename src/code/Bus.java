@@ -13,7 +13,8 @@ public class Bus
 {
 	private String identifier;
 	private Line line;
-	private Point position;
+	private Point currentPosition;
+	private Point previousPoint;
 
 	/**
 	 * Bus constructor, receives a identifier that should be unique
@@ -32,7 +33,7 @@ public class Bus
 		//gets route first point and set this point as the start position of the bus
 		double latitude = this.line.getRoute().getPointAtIndex(0).getLatitude();
 		double longitude = this.line.getRoute().getPointAtIndex(0).getLongitude();
-		this.position = new Point(latitude, longitude);
+		this.currentPosition = new Point(latitude, longitude);
 	}
 
 	public boolean move(float distance)
