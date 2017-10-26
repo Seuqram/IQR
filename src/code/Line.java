@@ -1,12 +1,15 @@
 package code;
 
+import java.util.ArrayList;
+
 import lombok.Getter;
 
-@Getter
+
 public class Line
 {
-	private int number;
-	private Route route;
+	@Getter private int number;
+	@Getter private Route route;
+	@Getter private ArrayList<Bus> busesList;
 
 	/**
 	 * Constructor that receives a number and instantiate a new Route
@@ -16,5 +19,14 @@ public class Line
 	{
 		this.number = number;
 		this.route = new Route();
+		this.busesList = new ArrayList<>();
+	}
+	
+	/**
+	 * Adds a bus to the line's bus list
+	 * @param bus
+	 */
+	public void addBus(Bus bus) {
+		busesList.add(bus);
 	}
 }
