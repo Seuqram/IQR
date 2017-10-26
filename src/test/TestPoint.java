@@ -130,15 +130,6 @@ public class TestPoint {
 		assertEquals(11, resultPoint.getLongitude(), 0);
 	}
 	
-//	@Test
-//	public void testGetPointWithInvalidDistance(){
-//		Point startPoint = new Point(0, 0);
-//		Point endPoint = new Point(3, 4);
-//		Point resultPoint = Point.calculatePoint(6, startPoint, endPoint);
-//		assertEquals(startPoint.getLatitude(), resultPoint.getLatitude(), 0);
-//		assertEquals(startPoint.getLongitude(), resultPoint.getLongitude(), 0);
-//	}
-	
 	@Test
 	public void testGetPointWithInvalidDistance(){
 		Point startPoint = new Point (3,4);
