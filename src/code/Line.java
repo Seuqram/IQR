@@ -29,4 +29,10 @@ public class Line
 	public void addBus(Bus bus) {
 		busesList.add(bus);
 	}
+	
+	public int getExpectedBusDistance() {
+		int routeSize = this.route.getSize();
+		int busQuantity = this.busesList.size();
+		return routeSize / busQuantity;
+	}
 }
