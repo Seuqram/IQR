@@ -13,8 +13,8 @@ public class Bus
 {
 	private String identifier;
 	private Line line;
-	private Point currentPosition;
-	private Point previousPoint;
+	private Point routePosition;
+	private Point distancePosition;
 
 	/**
 	 * Bus constructor, receives a identifier that should be unique
@@ -33,7 +33,28 @@ public class Bus
 		//gets route first point and set this point as the start position of the bus
 		double latitude = this.line.getRoute().getPointAtIndex(0).getLatitude();
 		double longitude = this.line.getRoute().getPointAtIndex(0).getLongitude();
-		this.currentPosition = new Point(latitude, longitude);
-		this.previousPoint = this.currentPosition;
+		this.routePosition = new Point(latitude, longitude);
+		this.distancePosition = new Point(0, 0);
+	}
+	
+	/**
+	 * Moves the bus in the straight line that represents the route size. The bus
+	 * can not move a distance bigger than the route size
+	 * @param distance
+	 */
+	public boolean move(double distance) {
+		double currentLongitude = this.distancePosition.getLongitude();
+		double routeSize = this.line.getRoute().getRouteSize();
+		
+		if (distance < routeSize) {
+			double sumCurrentLongitudeAndDistance = currentLongitude + distance;
+			if (currentLongitude + distance >= routeSize) {
+				distance = routeSize > sumCurrentLongitudeAndDistance ? routeSize - sumCurrentLongitudeAndDistance : sumCurrentLongitudeAndDistance - routeSize;
+				currentLongitude = 0;
+			}
+			this.distancePosition.setLongitude(currentLongitude + distance);
+			return true;
+		}else
+			return false;
 	}
 }

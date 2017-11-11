@@ -111,63 +111,29 @@ public class TestRoute {
 		assertTrue(firstTestPoint.equals(resultPoint));
 	}
 	
-//	@Test
-//	public void testGetRouteSize() {
-//		testRoute.addPoint(0, 1);
-//		testRoute.addPoint(0, 4);
-//		testRoute.addPoint(0, 8);
-//		testRoute.addPoint(0, 12);
-//		assertEquals(22, testRoute.getSize(), 0);
-//	}
+	@Test
+	public void testGetRouteSizeStraightLineLatitudeAxis() {
+		testRoute.addPoint(0, 1);
+		testRoute.addPoint(0, 4);
+		testRoute.addPoint(0, 8);
+		testRoute.addPoint(0, 12);
+		assertEquals(22, testRoute.getRouteSize(), 0);
+	}
 	
-//	@Test
-//	public void testGetBusesDistanceSamePosition() {
-//		Line testLine = new Line(107);
-//		Route busesRoute = testLine.getRoute();
-//		busesRoute.addPoint(0, 1);
-//		busesRoute.addPoint(0, 4);
-//		busesRoute.addPoint(0, 8);
-//		busesRoute.addPoint(0, 12);
-//		Bus busOne = new Bus("1", testLine);
-//		Bus busTwo = new Bus("2", testLine);
-//		assertEquals(0, busesRoute.getDistanceBetweenBuses(busOne, busTwo));
-//	}
-//	
-//	@Test
-//	public void testGetBusesDistanceBeetweenSamePoints() {
-//		Line testLine = new Line(107);
-//		Route busesRoute = testLine.getRoute();
-//		busesRoute.addPoint(0, 1);
-//		busesRoute.addPoint(0, 4);
-//		busesRoute.addPoint(0, 8);
-//		busesRoute.addPoint(0, 12);
-//		Bus busOne = new Bus("1", testLine);
-//		Bus busTwo = new Bus("2", testLine);
-//		assertTrue(busOne.move(2));
-//		assertTrue(busOne.getCurrentPosition().equals(0, 3));
-//		assertTrue(busTwo.getCurrentPosition().equals(busesRoute.getPointAtIndex(0)));
-//		assertEquals(2, busesRoute.getDistanceBetweenBuses(busOne, busTwo));
-//	}
-//	
-//	@Test
-//	public void testGetBusesDistanceApartByOnePoint() {
-//		Line testLine = new Line(107);
-//		Route busesRoute = testLine.getRoute();
-//		busesRoute.addPoint(0, 1);
-//		busesRoute.addPoint(1, 4);
-//		busesRoute.addPoint(2, 8);
-//		busesRoute.addPoint(3, 12);
-//		Bus busOne = new Bus("1", testLine);
-//		Bus busTwo = new Bus("2", testLine);
-//		assertTrue(busOne.move(4));
-//		assertTrue(busOne.getCurrentPosition().equals(1.25, 5));
-//		assertTrue(busTwo.getCurrentPosition().equals(busesRoute.getPointAtIndex(0)));
-//		assertEquals(4, busesRoute.getDistanceBetweenBuses(busOne, busTwo));
-//	}
+	@Test
+	public void testGetRouteSizeStraightLineLongitudeAxis() {
+		testRoute.addPoint(1, 0);
+		testRoute.addPoint(4, 0);
+		testRoute.addPoint(8, 0);
+		testRoute.addPoint(12, 0);
+		assertEquals(22, testRoute.getRouteSize(), 0);
+	}
 	
-	//TODO
-//	@Test
-//	public void testGetBusesDistanceApartByMoreThenPoint() {
-//	}
+	@Test
+	public void testGetRouteSizeDiagonalLine() {
+		testRoute.addPoint(1, 1);
+		testRoute.addPoint(4, 4);
+		assertEquals(8, testRoute.getRouteSize(), 1);
+	}
 
 }

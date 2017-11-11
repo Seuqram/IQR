@@ -104,79 +104,12 @@ public class Route
 	/**
 	 * @return the total size of the route
 	 */
-	public double getSize() {
+	public double getRouteSize() {
 		double size = 0;
 		for (int index = 0; index < this.getPointsQuantity(); index++) {
 			Point point = this.points.get(index);
 			size = size + point.getDistanceToPoint(this.getNextPoint(point));
 		}
 		return size;
-	}
-	
-	/**
-	 * 
-	 * @param busOne
-	 * @param busTwo
-	 * @return
-	 */
-	public double getDistanceBetweenBuses(Bus busOne, Bus busTwo) {
-		if (busesBetwenSamePoints(busOne, busTwo)) {
-			double distance = busOne.getCurrentPosition().getDistanceToPoint(busTwo.getCurrentPosition());
-			return distance;
-		}
-		double distance = busOne.getCurrentPosition().getDistanceToPoint(busTwo.getCurrentPosition());
-		return distance;
-	}
-	
-	/**
-	 * This method receveis two buses and tells wich one
-	 * is further to route's first point, this bus is the first
-	 * one
-	 * @param busOne
-	 * @param busTwo
-	 * @return
-	 */
-	public Bus getFirstBus(Bus busOne, Bus busTwo) {
-		int busOnePreviousPointIndex = this.getIndexOfPoint(busOne.getPreviousPoint());
-		int busTwoPreviousPointIndex = this.getIndexOfPoint(busTwo.getPreviousPoint());
-		if (!busesBetwenSamePoints(busOne, busTwo)) {
-			if (!busesOnSamePositions(busOne, busTwo)) {
-				double busOneDistanceToPreviousPoint = busOne.getPreviousPoint().getDistanceToPoint(busOne.getCurrentPosition());
-				double busTwoDistanceToPreviousPoint = busTwo.getPreviousPoint().getDistanceToPoint(busTwo.getCurrentPosition());
-				if (busOneDistanceToPreviousPoint > busTwoDistanceToPreviousPoint)
-					return busOne;
-				else
-					return busTwo;
-			}
-		}else {
-			if (busOnePreviousPointIndex > busTwoPreviousPointIndex) {
-				return busOne;
-			}else {
-				return busTwo;
-			}
-		}
-		return busOne;
-	}
-	
-	/**
-	 * 
-	 * @param busOne
-	 * @param busTwo
-	 * @return
-	 */
-	public boolean busesBetwenSamePoints(Bus busOne, Bus busTwo) {
-		int busOnePreviousPointIndex = this.getIndexOfPoint(busOne.getPreviousPoint());
-		int busTwoPreviousPointIndex = this.getIndexOfPoint(busTwo.getPreviousPoint());
-		return (busOnePreviousPointIndex == busTwoPreviousPointIndex);
-	}
-	
-	/**
-	 * 
-	 * @param busOne
-	 * @param busTwo
-	 * @return
-	 */
-	public boolean busesOnSamePositions(Bus busOne, Bus busTwo) {
-		return (busOne.getCurrentPosition() == busTwo.getCurrentPosition());
 	}
 }
