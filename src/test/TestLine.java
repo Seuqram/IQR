@@ -26,11 +26,12 @@ public class TestLine {
 		testLine = null;
 	}
 
+	@SuppressWarnings("unused")
 	@Test
 	public void testGetExpectedBusDistance() {
-		Bus testBusOne = new Bus("1", testLine);
-		Bus testBusTwo = new Bus("2", testLine);
-		assertEquals(11, testLine.getExpectedBusDistance());
+		Bus busOne = new Bus("one", testLine);
+		Bus busTwo = new Bus("two", testLine);
+		assertEquals(11, testLine.getExpectedBusDistance(), 0);
 	}
 
 }

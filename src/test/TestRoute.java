@@ -5,9 +5,6 @@ import static org.junit.Assert.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import code.Bus;
-import code.Line;
 import code.Point;
 import code.Route;
 

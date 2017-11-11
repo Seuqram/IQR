@@ -36,39 +36,4 @@ public class Bus
 		this.currentPosition = new Point(latitude, longitude);
 		this.previousPoint = this.currentPosition;
 	}
-
-	public boolean move(float distance)
-	{
-		Route busRoute = this.line.getRoute();
-		Point nextPoint = this.line.getRoute().getNextPoint(this.previousPoint);
-		int nextPointDistance = nextPoint.getDistanceToPoint(this.currentPosition);
-		if (distance < nextPointDistance) {
-			this.currentPosition = Point.calculatePoint((int)distance, this.currentPosition, nextPoint);
-			return true;
-		}else {
-			if (distance == nextPointDistance) {
-				this.currentPosition = nextPoint;
-				this.previousPoint = nextPoint;
-				return true;
-			}else {
-				Point oldNextPoint = nextPoint;
-				do {
-					distance = distance > nextPointDistance ? distance - nextPointDistance : nextPointDistance - distance;
-					Point auxPoint = nextPoint;
-					nextPoint = busRoute.getNextPoint(nextPoint);
-					nextPointDistance = nextPoint.getDistanceToPoint(oldNextPoint);
-					oldNextPoint = auxPoint;
-				} while (distance > nextPointDistance);
-				if (distance == nextPointDistance) {
-					this.currentPosition = nextPoint;
-					this.previousPoint = nextPoint;
-					return true;
-				}
-				this.currentPosition = Point.calculatePoint((int)distance, oldNextPoint, nextPoint);
-				this.previousPoint = oldNextPoint;
-				return true;
-			}
-		}
-//		return false;
-	}
 }

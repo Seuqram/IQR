@@ -30,8 +30,8 @@ public class Line
 		busesList.add(bus);
 	}
 	
-	public int getExpectedBusDistance() {
-		int routeSize = this.route.getSize();
+	public double getExpectedBusDistance() {
+		double routeSize = this.route.getSize();
 		int busQuantity = this.busesList.size();
 		return routeSize / busQuantity;
 	}
