@@ -53,7 +53,7 @@ public class Point
 	}
 	
 	/**
-	 * Receives latitude and longitude (on that order) and return
+	 * Receives latitude and longitude (in that order) and return
 	 * if the instance point has the same atributtes
 	 * @param latitude
 	 * @param longitude
