@@ -60,4 +60,21 @@ public class Line
 	public Bus getBusAtIndex(int index) {
 		return this.busesList.get(index);
 	}
+
+	public int getBusQuantity() {
+		return this.busesList.size();
+	}
+	
+	/**
+	 * @return if all buses on the line are in the exact same position
+	 */
+	public boolean busesOnSamePosition() {
+		Point basePoint = this.busesList.get(0).getDistancePosition();
+		boolean samePosition = true;
+		for (Bus bus : this.busesList)
+			if (samePosition)
+				if (!bus.getDistancePosition().equals(basePoint))
+					samePosition = false;
+		return samePosition;
+	}
 }

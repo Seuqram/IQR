@@ -16,7 +16,19 @@ public class QualityCalculator {
 	
 	public double getRouteQuality(Line line) {
 		double expectedDistance = line.getExpectedBusDistance();
-		return 0;
+		int busQuantity = line.getBusQuantity();
+		double totalDistance = 0;
+		double distanceQuantity = busQuantity - 1;
+		if (line.busesOnSamePosition())
+			return 0;		
+		line.sortBusList();
+		for (int index = 0; index < busQuantity - 1; index ++) {
+			Bus busOne = line.getBusAtIndex(index);
+			Bus busTwo = line.getBusAtIndex(index + 1);
+			totalDistance = totalDistance + getDistanceBetweenBuses(busOne, busTwo);
+		}
+		System.out.println(totalDistance);
+		return ((totalDistance/distanceQuantity)/expectedDistance) * 100;
 	}
 	
 	public double getDistanceBetweenBuses(Bus busOne, Bus busTwo) {
