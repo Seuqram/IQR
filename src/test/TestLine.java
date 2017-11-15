@@ -33,5 +33,18 @@ public class TestLine {
 		Bus busTwo = new Bus("two", testLine);
 		assertEquals(11, testLine.getExpectedBusDistance(), 0);
 	}
+	
+	@Test
+	public void testGetLineBusesOnOrder() {
+		Bus busOne = new Bus("one", testLine);
+		Bus busTwo = new Bus("two", testLine);
+		Bus busThree = new Bus("three", testLine);
+		assert(busOne.move(5));
+		assert(busTwo.move(7));
+		testLine.sortBusList();
+		assertEquals(busThree, testLine.getBusAtIndex(0));
+		assertEquals(busOne, testLine.getBusAtIndex(1));
+		assertEquals(busTwo, testLine.getBusAtIndex(2));
+	}
 
 }
