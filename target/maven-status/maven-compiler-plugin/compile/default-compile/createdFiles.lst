@@ -1,7 +1,11 @@
+code\QualityCalculator.class
+test\TestRoute.class
+test\TestPoint.class
 test\TestBus.class
 code\Point.class
+test\TestQualityCalculator.class
 code\Bus.class
-code\BusList.class
 code\Route.class
 code\Line.class
 code\Main.class
+test\TestLine.class
