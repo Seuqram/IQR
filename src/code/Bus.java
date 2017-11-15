@@ -57,4 +57,12 @@ public class Bus
 		}else
 			return false;
 	}
+	
+	/**
+	 * 
+	 * @return the Longitude of the distance point
+	 */
+	public double getLongitudeDistancePosition() {
+		return this.distancePosition.getLongitude();
+	}
 }
