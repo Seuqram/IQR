@@ -6,6 +6,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import code.Line;
+import code.LinePrinter;
 import code.QualityCalculator;
 import code.Bus;
 
@@ -26,6 +27,8 @@ public class TestQualityCalculator {
 	
 	@After // tearDown()
 	public void after() throws Exception {
+		LinePrinter printer = LinePrinter.getInstance();
+		printer.printLine(testLine);
 		testLine = null;
 		testBusList.clear();
 	}
@@ -78,6 +81,8 @@ public class TestQualityCalculator {
 		moveBusAtIndex(0, testLine.getExpectedBusDistance() * 2);
 		moveBusAtIndex(1, testLine.getExpectedBusDistance());
 		assertEquals(100, calculator.getRouteQuality(testLine), 0);
+		LinePrinter printer = LinePrinter.getInstance();
+		printer.printLine(testLine);
 	}
 	
 	@Test
@@ -87,12 +92,25 @@ public class TestQualityCalculator {
 		assertEquals(50, calculator.getRouteQuality(testLine), 0);
 	}
 	
-//	@Test
-//	public void testDistanceBetweenBusesOnSamePosition() {
-//		addQuantityOfBusToList(2);
-//		assertEquals(0, calculator.getDistanceBetweenBuses(testBusList.get(0), testBusList.get(1)), 0);
-//	}
-//	
+	@Test
+	public void testDistanceBetweenBusesOnSamePosition() {
+		addQuantityOfBusToList(2);
+		assertEquals(0, calculator.getDistanceBetweenBuses(testBusList.get(0), testBusList.get(1)), 0);
+	}
+	
+	@Test
+	public void testDistanceWhenItsDoubleTheExpected() {
+		addQuantityOfBusToList(3);
+		moveBusAtIndex(0, testLine.getExpectedBusDistance() * 2.1);
+		assertEquals(0, calculator.getRouteQuality(testLine), 0);
+	}
+	
+	@Test
+	public void testDistanceWhenItsGreatherThenExpected() {
+		addQuantityOfBusToList(2);
+		moveBusAtIndex(0, testLine.getExpectedBusDistance() * 1.1);
+		assertEquals(90, calculator.getRouteQuality(testLine), 0.5);
+	}
 //	@Test
 //	public void testDistanceBetweenBusesOnDifferentPositions() {
 //		addQuantityOfBusToList(2);

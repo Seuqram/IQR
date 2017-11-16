@@ -1,7 +1,6 @@
 package code;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class QualityCalculator {
 	private static QualityCalculator qualityCalculator = null;
@@ -25,9 +24,16 @@ public class QualityCalculator {
 		for (int index = 0; index < busQuantity - 1; index ++) {
 			Bus busOne = line.getBusAtIndex(index);
 			Bus busTwo = line.getBusAtIndex(index + 1);
-			totalDistance = totalDistance + getDistanceBetweenBuses(busOne, busTwo);
+			double distanceBetweenBuses = getDistanceBetweenBuses(busOne, busTwo);
+			if (distanceBetweenBuses > expectedDistance) {
+				if (distanceBetweenBuses > expectedDistance * 2)
+					distanceBetweenBuses = 0;
+				else
+					distanceBetweenBuses = (expectedDistance * 2) - distanceBetweenBuses;
+				
+			}
+			totalDistance = totalDistance + distanceBetweenBuses;
 		}
-		System.out.println(totalDistance);
 		return ((totalDistance/distanceQuantity)/expectedDistance) * 100;
 	}
 	
