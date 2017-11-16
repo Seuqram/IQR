@@ -47,18 +47,18 @@ public class LinePrinter {
 				previousPoint = new Point(0, 0);
 				double distanceBetweenStartAndFirstBus = getDistanceBetweenPoints(previousPoint, bus.getDistancePosition());
 				if (distanceBetweenStartAndFirstBus > 0)
-					printValue(distanceBetweenStartAndFirstBus);
+					printDistance(distanceBetweenStartAndFirstBus);
 				printBus(bus);
 			}else {
 				double distanceBetweenBuses = getDistanceBetweenPoints(previousPoint, bus.getDistancePosition());
 				if (distanceBetweenBuses > 0)
-					printValue(distanceBetweenBuses);
+					printDistance(distanceBetweenBuses);
 				printBus(bus);
 			}
 			if (index + 1 == busQuantity) {
 				double distanceToEndPoint = getDistanceBetweenPoints(bus.getDistancePosition(), new Point(0, routeSize));
 				if (distanceToEndPoint > 0)
-					printValue(distanceToEndPoint);
+					printDistance(distanceToEndPoint);
 			}
 			previousPoint = bus.getDistancePosition();
 		}
@@ -82,7 +82,7 @@ public class LinePrinter {
 	
 	private void printBus(Bus bus) {
 //		printSymbol(busSymbol);
-		System.out.print("_/" + bus.getIdentifier() + "\\_");
+		System.out.print("|" + bus.getIdentifier() + "|");
 	}
 	
 	private void printStartSymbol() {
@@ -99,5 +99,15 @@ public class LinePrinter {
 	
 	private void printValue(double value) {
 		System.out.print(df2.format(value));
+	}
+	
+	private void printDistanceSeparator() {
+		System.out.print("---");
+	}
+	
+	private void printDistance(double distance) {
+		printDistanceSeparator();
+		printValue(distance);
+		printDistanceSeparator();
 	}
 }
