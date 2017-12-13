@@ -102,7 +102,7 @@ public class TestQualityCalculator {
 	public void testDistanceWhenItsDoubleTheExpected() {
 		addQuantityOfBusToList(3);
 		moveBusAtIndex(0, testLine.getExpectedBusDistance() * 2.1);
-		assertEquals(0, calculator.getRouteQuality(testLine), 0);
+		assertEquals(15, calculator.getRouteQuality(testLine), 0);
 	}
 	
 	@Test

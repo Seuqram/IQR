@@ -5,7 +5,6 @@ import java.text.DecimalFormat;
 public class LinePrinter {
 	private static LinePrinter printer = null;
 	private static char startPointSymbol = (char) 166;
-	private static char busSymbol = (char) 187;
 	private static char endPointSymbol = startPointSymbol;
 	private static DecimalFormat df2 = new DecimalFormat("0.##");
 	
@@ -81,8 +80,11 @@ public class LinePrinter {
 	}
 	
 	private void printBus(Bus bus) {
-//		printSymbol(busSymbol);
-		System.out.print("|" + bus.getIdentifier() + "|");
+		String busIdentifier = String.valueOf(bus.getIdentifier());
+		if (busIdentifier.length() == 1)
+			busIdentifier = "0" + busIdentifier;
+		
+		System.out.print("|" + busIdentifier + "|"); 
 	}
 	
 	private void printStartSymbol() {
