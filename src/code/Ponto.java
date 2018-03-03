@@ -12,7 +12,7 @@ import lombok.Setter;
  */
 
 @Getter @Setter @AllArgsConstructor
-public class Point
+public class Ponto
 {
 	private double latitude;
 	private double longitude;
@@ -22,7 +22,7 @@ public class Point
 	 * @return a double representing the distance
 	 * between the given point and the instance point
 	 */
-	public double getDistanceToPoint(Point givenPoint) {
+	public double getDistanceToPoint(Ponto givenPoint) {
 		return this.getDistanceToPoint(givenPoint.getLatitude(), givenPoint.getLongitude());
 	}
 	
@@ -48,7 +48,7 @@ public class Point
 	 * @return if the givenPoint and the instance point
 	 * have the same latitude and longitude
 	 */
-	public boolean equals(Point givenPoint) {
+	public boolean equals(Ponto givenPoint) {
 		return this.equals(givenPoint.getLatitude(), givenPoint.getLongitude());
 	}
 	

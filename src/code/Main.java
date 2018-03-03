@@ -1,70 +1,161 @@
 package code;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Random;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
-public class Main{
-	
-	static ArrayList<Bus> busList = new ArrayList<>();
-	static Line line = new Line(107);
-	public static void main(String[] args){
-		LinePrinter printer = LinePrinter.getInstance();
-		line.getRoute().addPoint(0, 1);
-		line.getRoute().addPoint(0, 4);
-		line.getRoute().addPoint(0, 8);
-		line.getRoute().addPoint(0, 21);
-//		addQuantityOfBusToList(10);
-		Random numberGenerator = new Random();
-//		printer.printLineRouteData(line);
-//		printer.printBusesOnRoute(line);
-//		System.out.println();
-//		for (int index = 0; index < 20; index ++) {
-//			double random = numberGenerator.nextDouble() * 20;
-//			double distance = (random);
-//			moveBusAtIndex(index % 10, distance);
-//			System.out.println();
-//			printer.printBusesOnRoute(line);
-//			printer.printQuality(line);
-//		}
-//		System.out.println();
-//		printer.printBusesOnRoute(line);
-//		printer.printQuality(line);
-		
-		Bus busOne = new Bus("1", line);
-		Bus busTwo = new Bus("2", line);
-		Bus busThree = new Bus("2", line);
-		printer.printLineRouteData(line);
-		printer.printBusesOnRoute(line);
-		printer.printQuality(line);
-		Double routeMove = (double) 39;
-		busOne.move(routeMove);
-		printer.printBusesOnRoute(line);
-		printer.printQuality(line);
-		for (int index = 0; index < routeMove; index ++) {
-			busTwo.move(1);
-			printer.printBusesOnRoute(line);
-			printer.printQuality(line);
+import org.decimal4j.util.DoubleRounder;
+
+import br.unirio.onibus.api.download.BaixadorPosicaoVeiculos;
+import br.unirio.onibus.api.gmaps.dinamico.DecoradorCaminhoEstaticoLinha;
+import br.unirio.onibus.api.gmaps.dinamico.DecoradorPosicaoEstaticaMarcador;
+import br.unirio.onibus.api.gmaps.dinamico.GeradorMapas;
+import br.unirio.onibus.api.gmaps.estatico.StaticMapGenerator;
+import br.unirio.onibus.api.model.ConjuntoLinhas;
+import br.unirio.onibus.api.model.Linha;
+import br.unirio.onibus.api.model.PosicaoVeiculo;
+import br.unirio.onibus.api.model.Repositorio;
+import br.unirio.onibus.api.model.Trajetoria;
+import br.unirio.onibus.api.model.Veiculo;
+import br.unirio.onibus.api.support.geo.PosicaoMapa;
+
+public class Main {
+
+	static ArrayList<OnibusIqr> busList = new ArrayList<>();
+	static String nomeArquivo = "data/iqr.txt";
+	static String numeroLinha = "107";
+	static String idTrajeto = "12863255";
+
+	public static void main(String[] args) throws IOException {
+		ConjuntoLinhas linhas = new BaixadorPosicaoVeiculos().baixa();
+		// ConjuntoLinhas linhas = new
+		// BaixadorPosicaoVeiculos().carrega("data/instantaneo.csv");
+		Linha linha = linhas.pegaLinha(numeroLinha);
+		Repositorio repositorio = new Repositorio("data");
+		repositorio.carregaTrajeto(linha, idTrajeto);
+		List<Veiculo> listaDeVeiculosDaLinha = (List<Veiculo>) linha.getVeiculos();
+		List<PosicaoMapa> listaPosicoesTrajetoria = getListaPosicoesTrajetoria(linha);
+		LinhaIqr line = getLinhaComPosicoesDeIdaEVolta(listaDeVeiculosDaLinha, listaPosicoesTrajetoria);
+		RotaIqr route = line.getRotaIqr();
+
+		// GeradorMapas gm = new GeradorMapas();
+		StaticMapGenerator smg = new StaticMapGenerator("terrain", "1280x1280");
+
+		Map<Integer, Ponto> map = new TreeMap<>();
+		for (int index = 0; index < line.getBusQuantity(); index++) {
+			OnibusIqr bus = line.getBusAtIndex(index);
+			Ponto pontoDaRotaMaisProximo = bus.getPontoDaRotaMaisProximo();
+			int indexOfPoint = route.getIndexOfPoint(pontoDaRotaMaisProximo);
+			if (!(indexOfPoint > 334 && indexOfPoint < 370)) {
+				map.put(indexOfPoint, pontoDaRotaMaisProximo);
+			}
 		}
+		Set<Integer> keySet = map.keySet();
+		double expectedBusDistance = line.getExpectedBusDistance();
+		double totalDistance = 0;
+		Ponto pontoAnterior = null;
+		boolean b = false;
+		List<String> colorList = Arrays.asList("red", "blue", "green", "pink", "black");
+		int integer = 0;
+		GeradorMapas gm = new GeradorMapas();
+		for (Iterator iterator = keySet.iterator(); iterator.hasNext();) {
+			int key = (int) iterator.next();
+			Ponto pontoAtual = map.get(key);
+			String color = colorList.get(integer);
+			DecoradorPosicaoEstaticaMarcador decoradorAtual = new DecoradorPosicaoEstaticaMarcador(
+					pontoAtual.getLatitude(), pontoAtual.getLongitude(), color, "");
+			gm.adiciona(decoradorAtual);
+			if (pontoAnterior != null) {
+				int indexPontoAtual = route.getIndexOfPoint(pontoAtual);
+				int indexPontoAnterior = route.getIndexOfPoint(pontoAnterior);
+				RotaIqr rota = new RotaIqr();
+				List<PosicaoMapa> list = new ArrayList<>();
+				for (int index = indexPontoAnterior; index <= indexPontoAtual; index++) {
+					Ponto pointAtIndex = route.getPointAtIndex(index);
+					rota.addPoint(pointAtIndex);
+					list.add(new PosicaoMapa(pointAtIndex.getLatitude(), pointAtIndex.getLongitude()));
+				}
+				double distanceBetweenBuses = rota.getRouteSize();
+				Trajetoria trajetoria = new Trajetoria();
+				for (int index = 0; index < rota.getPointsQuantity(); index++) {
+					Ponto pointAtIndex = rota.getPointAtIndex(index);
+					trajetoria.adiciona(pointAtIndex.getLatitude(), pointAtIndex.getLongitude());
+				}
+				DecoradorCaminhoEstaticoLinha decoradorCaminho = new DecoradorCaminhoEstaticoLinha(trajetoria);
+				decoradorCaminho.setCor(color);
+				gm.adiciona(decoradorCaminho);
+				integer = integer++ == 4 ? 0 : integer++;
+				double indice = 1;
+				if (distanceBetweenBuses == expectedBusDistance) {
+					// totalDistance += 1;
+				} else {
+					if (distanceBetweenBuses < expectedBusDistance) {
+						indice = distanceBetweenBuses / expectedBusDistance;
+					} else {
+						indice = 1 - ((distanceBetweenBuses - expectedBusDistance)
+								/ (route.getRouteSize() - expectedBusDistance));
+					}
+				}
+				totalDistance += indice;
+				DecoradorPosicaoEstaticaMarcador decoradorAnterior = new DecoradorPosicaoEstaticaMarcador(
+						pontoAnterior.getLatitude(), pontoAnterior.getLongitude(), color,
+						String.valueOf(DoubleRounder.round(indice * 100, 2)));
+				gm.adiciona(decoradorAnterior);
+			}
+			pontoAnterior = pontoAtual;
+		}
+
+		// linha.getTrajetoIda().pegaPosicoes().forEach(posicao -> {
+		// DecoradorPosicaoEstaticaMarcador decorador = new
+		// DecoradorPosicaoEstaticaMarcador(posicao.getLatitude(),
+		// posicao.getLongitude(), "green",
+		// String.valueOf(linha.getTrajetoIda().pegaIndicePosicao(posicao)));
+		// gm.adiciona(decorador);
+		// });
+		// for (int index = 0; index < line.getBusQuantity(); index++) {
+		// Bus bus = line.getBusAtIndex(index);
+		// DecoradorPosicaoEstaticaMarcador decorador = new
+		// DecoradorPosicaoEstaticaMarcador(
+		// bus.getPontoDaRotaMaisProximo().getLatitude(),
+		// bus.getPontoDaRotaMaisProximo().getLongitude(),
+		// "red", String.valueOf(index + 1));
+		// gm.adiciona(decorador);
+		// }
+		// 335 370
+		double distanceQuantity = line.getBusQuantity() - 1;
+		System.out.println(DoubleRounder.round((totalDistance / distanceQuantity) * 100, 2));
+		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm");
+		gm.publica("result/" + LocalDateTime.now().format(dtf));
 	}
-	
-	public static void addBusToList() {
-		int previousBusQuantity = busList.size();
-		Random numberGenerator = new Random();
-		busList.add(new Bus(String.valueOf(numberGenerator.nextInt(100)), line));
-		int currentBusQuantity = busList.size();
-		assert(currentBusQuantity - previousBusQuantity == 1);
+
+	private static List<PosicaoMapa> getListaPosicoesTrajetoria(Linha linha) {
+		List<PosicaoMapa> listaPosicoesTrajetoria = new ArrayList<>();
+		((List<PosicaoMapa>) linha.getTrajetoIda().pegaPosicoes()).forEach(posicao -> {
+			listaPosicoesTrajetoria.add(posicao);
+		});
+		((List<PosicaoMapa>) linha.getTrajetoVolta().pegaPosicoes()).forEach(posicao -> {
+			listaPosicoesTrajetoria.add(posicao);
+		});
+		return listaPosicoesTrajetoria;
 	}
-	
-	public static void addQuantityOfBusToList(int quantity) {
-		int previousBusQuantity = busList.size();
-		for (int index = 0; index < quantity; index ++)
-			addBusToList();
-		int currentBusQuantity = busList.size();
-		assert(currentBusQuantity - previousBusQuantity == quantity);
-	}
-	
-	public static void moveBusAtIndex(int index, double distance) {
-		Bus firstBus = busList.get(index);
-		firstBus.move(distance);
+
+	private static LinhaIqr getLinhaComPosicoesDeIdaEVolta(List<Veiculo> listaDeVeiculosDaLinha,
+			List<PosicaoMapa> listaPosicoesTrajetoria) {
+		LinhaIqr line = new LinhaIqr(624);
+		listaPosicoesTrajetoria.forEach(ponto -> {
+			line.addPointToRoute(ponto.getLatitude(), ponto.getLongitude());
+		});
+		listaDeVeiculosDaLinha.forEach(veiculo -> {
+			PosicaoVeiculo next = veiculo.getTrajetoria().getPosicoes().iterator().next();
+			OnibusIqr bus = new OnibusIqr(veiculo.getNumeroSerie(), line, next.getLatitude(), next.getLongitude());
+		});
+		return line;
 	}
 }

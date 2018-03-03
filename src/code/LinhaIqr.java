@@ -15,7 +15,7 @@ public class LinhaIqr {
 	@Getter
 	private int number;
 	@Getter
-	private Route route;
+	private RotaIqr rotaIqr;
 	private List<OnibusIqr> listaOnibusIqr;
 
 	/**
@@ -26,7 +26,7 @@ public class LinhaIqr {
 	 */
 	public LinhaIqr(int number) {
 		this.number = number;
-		this.route = new Route();
+		this.rotaIqr = new RotaIqr();
 		this.listaOnibusIqr = new ArrayList<>();
 	}
 
@@ -46,7 +46,7 @@ public class LinhaIqr {
 	 * @return the relation between the routeSize and the busQuantity
 	 */
 	public double getExpectedBusDistance() {
-		double routeSize = this.route.getRouteSize();
+		double routeSize = this.rotaIqr.getRouteSize();
 		int busQuantity = this.listaOnibusIqr.size();
 		return routeSize / busQuantity;
 	}
@@ -94,6 +94,6 @@ public class LinhaIqr {
 	}
 
 	public void addPointToRoute(Double latitude, Double longitude) {
-		this.getRoute().addPoint(latitude, longitude);
+		this.getRotaIqr().addPoint(latitude, longitude);
 	}
 }

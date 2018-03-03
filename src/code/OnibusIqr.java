@@ -54,7 +54,7 @@ public class OnibusIqr {
 	 */
 	public boolean move(double distance) {
 		double currentLongitude = this.distancePosition.getLongitude();
-		double routeSize = this.linhaIqr.getRoute().getRouteSize();
+		double routeSize = this.linhaIqr.getRotaIqr().getRouteSize();
 
 		if (distance < routeSize) {
 			double sumCurrentLongitudeAndDistance = currentLongitude + distance;
@@ -83,7 +83,7 @@ public class OnibusIqr {
 	}
 
 	public Ponto getPontoDaRotaMaisProximoPosicaoAtual() {
-		Route route = linhaIqr.getRoute();
+		RotaIqr route = linhaIqr.getRotaIqr();
 		double distancia = route.getPointAtIndex(0).getDistanceToPoint(this.getRoutePosition());
 		Ponto ponto = route.getPointAtIndex(0);
 		for (int index = 1; index < route.getPointsQuantity(); index++) {
