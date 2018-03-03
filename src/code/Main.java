@@ -34,36 +34,37 @@ public class Main {
 	static String idTrajeto = "12863255";
 
 	public static void main(String[] args) throws IOException {
-		ConjuntoLinhas linhas = new BaixadorPosicaoVeiculos().baixa();
-		// ConjuntoLinhas linhas = new
-		// BaixadorPosicaoVeiculos().carrega("data/instantaneo.csv");
+		// ConjuntoLinhas linhas = new BaixadorPosicaoVeiculos().baixa();
+		ConjuntoLinhas linhas = new BaixadorPosicaoVeiculos().carrega("data/instantaneo.csv");
 		Linha linha = linhas.pegaLinha(numeroLinha);
 		Repositorio repositorio = new Repositorio("data");
 		repositorio.carregaTrajeto(linha, idTrajeto);
 		List<Veiculo> listaDeVeiculosDaLinha = (List<Veiculo>) linha.getVeiculos();
 		List<PosicaoMapa> listaPosicoesTrajetoria = getListaPosicoesTrajetoria(linha);
-		LinhaIqr line = getLinhaComPosicoesDeIdaEVolta(listaDeVeiculosDaLinha, listaPosicoesTrajetoria);
-		RotaIqr route = line.getRotaIqr();
+		LinhaIqr linhaIqr = getLinhaComPosicoesDeIdaEVolta(listaDeVeiculosDaLinha, listaPosicoesTrajetoria);
+		RotaIqr rotaIqr = linhaIqr.getRotaIqr();
 
 		// GeradorMapas gm = new GeradorMapas();
 		StaticMapGenerator smg = new StaticMapGenerator("terrain", "1280x1280");
 
 		Map<Integer, Ponto> map = new TreeMap<>();
-		for (int index = 0; index < line.getBusQuantity(); index++) {
-			OnibusIqr bus = line.getBusAtIndex(index);
+		for (int index = 0; index < linhaIqr.getBusQuantity(); index++) {
+			OnibusIqr bus = linhaIqr.getBusAtIndex(index);
 			Ponto pontoDaRotaMaisProximo = bus.getPontoDaRotaMaisProximo();
-			int indexOfPoint = route.getIndexOfPoint(pontoDaRotaMaisProximo);
+			int indexOfPoint = rotaIqr.getIndexOfPoint(pontoDaRotaMaisProximo);
 			if (!(indexOfPoint > 334 && indexOfPoint < 370)) {
 				map.put(indexOfPoint, pontoDaRotaMaisProximo);
 			}
 		}
 		Set<Integer> keySet = map.keySet();
-		double expectedBusDistance = line.getExpectedBusDistance();
+		double expectedBusDistance = linhaIqr.getExpectedBusDistance();
 		double totalDistance = 0;
 		Ponto pontoAnterior = null;
 		boolean b = false;
+
 		List<String> colorList = Arrays.asList("red", "blue", "green", "pink", "black");
 		int integer = 0;
+
 		GeradorMapas gm = new GeradorMapas();
 		for (Iterator iterator = keySet.iterator(); iterator.hasNext();) {
 			int key = (int) iterator.next();
@@ -73,12 +74,12 @@ public class Main {
 					pontoAtual.getLatitude(), pontoAtual.getLongitude(), color, "");
 			gm.adiciona(decoradorAtual);
 			if (pontoAnterior != null) {
-				int indexPontoAtual = route.getIndexOfPoint(pontoAtual);
-				int indexPontoAnterior = route.getIndexOfPoint(pontoAnterior);
+				int indexPontoAtual = rotaIqr.getIndexOfPoint(pontoAtual);
+				int indexPontoAnterior = rotaIqr.getIndexOfPoint(pontoAnterior);
 				RotaIqr rota = new RotaIqr();
 				List<PosicaoMapa> list = new ArrayList<>();
 				for (int index = indexPontoAnterior; index <= indexPontoAtual; index++) {
-					Ponto pointAtIndex = route.getPointAtIndex(index);
+					Ponto pointAtIndex = rotaIqr.getPointAtIndex(index);
 					rota.addPoint(pointAtIndex);
 					list.add(new PosicaoMapa(pointAtIndex.getLatitude(), pointAtIndex.getLongitude()));
 				}
@@ -100,7 +101,7 @@ public class Main {
 						indice = distanceBetweenBuses / expectedBusDistance;
 					} else {
 						indice = 1 - ((distanceBetweenBuses - expectedBusDistance)
-								/ (route.getRouteSize() - expectedBusDistance));
+								/ (rotaIqr.getRouteSize() - expectedBusDistance));
 					}
 				}
 				totalDistance += indice;
@@ -129,8 +130,11 @@ public class Main {
 		// gm.adiciona(decorador);
 		// }
 		// 335 370
-		double distanceQuantity = line.getBusQuantity() - 1;
-		System.out.println(DoubleRounder.round((totalDistance / distanceQuantity) * 100, 2));
+		double distanceQuantity = linhaIqr.getBusQuantity() - 1;
+		// System.out.println(DoubleRounder.round((totalDistance / distanceQuantity) *
+		// 100, 2));
+		System.out.println(
+				CalculadorIQR.getInstance().getQualidadeRota(listaDeVeiculosDaLinha, listaPosicoesTrajetoria));
 		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm");
 		gm.publica("result/" + LocalDateTime.now().format(dtf));
 	}
