@@ -1,6 +1,20 @@
 package code;
 
+import java.io.IOException;
 import java.text.DecimalFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
+import br.unirio.onibus.api.gmaps.dinamico.DecoradorCaminhoEstaticoLinha;
+import br.unirio.onibus.api.gmaps.dinamico.DecoradorPosicaoEstaticaMarcador;
+import br.unirio.onibus.api.gmaps.dinamico.GeradorMapas;
+import br.unirio.onibus.api.model.Trajetoria;
+import br.unirio.onibus.api.model.Veiculo;
+import br.unirio.onibus.api.support.geo.PosicaoMapa;
 
 public class LinePrinter {
 	private static LinePrinter printer = null;
@@ -17,6 +31,68 @@ public class LinePrinter {
 		return printer;
 	}
 
+	public void publicaMapaHTML(List<Veiculo> listaDeVeiculosDaLinha, List<PosicaoMapa> listaPosicoesTrajetoria) {
+		CalculadorIQR calculador = CalculadorIQR.getInstance();
+		GeradorMapas geradorMapa = new GeradorMapas();
+		LinhaIqr linhaIqr = calculador.getLinhaComPosicoesDeIdaEVolta(listaDeVeiculosDaLinha, listaPosicoesTrajetoria);
+		RotaIqr rotaIqr = linhaIqr.getRotaIqr();
+		double distanciaEsperada = linhaIqr.getExpectedBusDistance();
+
+		List<String> colorList = Arrays.asList("red", "blue", "green", "pink", "black");
+		int integer = 0;
+
+		Ponto pontoAnterior = null;
+		for (Iterator<Integer> iterator = calculador.getIndicesPontosMapaOrenados(linhaIqr).iterator(); iterator
+				.hasNext();) {
+			int key = iterator.next();
+			Ponto pontoAtual = calculador.getMapIndicePonto(linhaIqr).get(key);
+			String color = colorList.get(integer);
+			DecoradorPosicaoEstaticaMarcador decoradorAtual = new DecoradorPosicaoEstaticaMarcador(
+					pontoAtual.getLatitude(), pontoAtual.getLongitude(), color, "");
+			geradorMapa.adiciona(decoradorAtual);
+			if (pontoAnterior != null) {
+				int indexPontoAtual = rotaIqr.getIndexOfPoint(pontoAtual);
+				int indexPontoAnterior = rotaIqr.getIndexOfPoint(pontoAnterior);
+				double distanciaEntreOnibus = calculador.getDistanciaEntreOnibus(rotaIqr, indexPontoAtual,
+						indexPontoAnterior);
+				DecoradorCaminhoEstaticoLinha decoradorCaminho = new DecoradorCaminhoEstaticoLinha(
+						getTrajetoriaLocal(indexPontoAnterior, indexPontoAtual, rotaIqr));
+				decoradorCaminho.setCor(color);
+				geradorMapa.adiciona(decoradorCaminho);
+				integer = integer++ == 4 ? 0 : integer++;
+				double indice = calculador.getIqrLocal(rotaIqr, distanciaEsperada, distanciaEntreOnibus);
+				DecoradorPosicaoEstaticaMarcador decoradorAnterior = new DecoradorPosicaoEstaticaMarcador(
+						pontoAnterior.getLatitude(), pontoAnterior.getLongitude(), color,
+						String.valueOf(calculador.arredondaPorcentagem(indice)));
+				geradorMapa.adiciona(decoradorAnterior);
+			}
+			pontoAnterior = pontoAtual;
+			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm");
+			try {
+				geradorMapa.publica("result/" + LocalDateTime.now().format(dtf));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private Trajetoria getTrajetoriaLocal(int indexPontoAnterior, int indexPontoAtual, RotaIqr rotaIqr) {
+		RotaIqr rota = new RotaIqr();
+		List<PosicaoMapa> list = new ArrayList<>();
+		for (int index = indexPontoAnterior; index <= indexPontoAtual; index++) {
+			Ponto pointAtIndex = rotaIqr.getPointAtIndex(index);
+			rota.addPoint(pointAtIndex);
+			list.add(new PosicaoMapa(pointAtIndex.getLatitude(), pointAtIndex.getLongitude()));
+		}
+		Trajetoria trajetoria = new Trajetoria();
+		for (int index = 0; index < rota.getPointsQuantity(); index++) {
+			Ponto pointAtIndex = rota.getPointAtIndex(index);
+			trajetoria.adiciona(pointAtIndex.getLatitude(), pointAtIndex.getLongitude());
+		}
+		return trajetoria;
+	}
+
 	public void printLine(LinhaIqr line) {
 		printLineRouteData(line);
 		printBusesOnRoute(line);
@@ -26,8 +102,8 @@ public class LinePrinter {
 
 	public void printQuality(LinhaIqr line) {
 		System.out.print("\nQualidade da Rota: ");
-		QualityCalculator calculator = QualityCalculator.getInstance();
-		printValue(calculator.getRouteQuality(line));
+		// CalculadorIQR calculator = CalculadorIQR.getInstance();
+		// printValue(calculator.getRouteQuality(line));
 		System.out.println("%");
 	}
 
@@ -115,4 +191,5 @@ public class LinePrinter {
 		printValue(distance);
 		printDistanceSeparator();
 	}
+
 }
