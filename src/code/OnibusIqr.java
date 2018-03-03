@@ -3,7 +3,7 @@ package code;
 import lombok.Getter;
 
 /**
- * Represents a bus
+ * Representa um onibus utilizado para calculo de IQR
  * 
  * @author rodrigo
  *
@@ -11,16 +11,16 @@ import lombok.Getter;
 @Getter
 public class OnibusIqr {
 	private String identificador;
-	private Line line;
+	private LinhaIqr linhaIqr;
 	private Ponto routePosition;
 	private Ponto distancePosition;
 	private Ponto pontoDaRotaMaisProximo;
-	
-	public OnibusIqr(String identifier, Line line) {
+
+	public OnibusIqr(String identifier, LinhaIqr line) {
 		this.identificador = identifier;
-		this.line = line;
-		this.line.addBus(this);
-		
+		this.linhaIqr = line;
+		this.linhaIqr.addBus(this);
+
 		this.routePosition = new Ponto(0, 0);
 		this.distancePosition = new Ponto(0, 0);
 		this.pontoDaRotaMaisProximo = getPontoDaRotaMaisProximoPosicaoAtual();
@@ -36,11 +36,11 @@ public class OnibusIqr {
 	 * @param line
 	 *            object from Line class
 	 */
-	public OnibusIqr(String identifier, Line line, double latitude, double longitude) {
+	public OnibusIqr(String identifier, LinhaIqr line, double latitude, double longitude) {
 		this.identificador = identifier;
-		this.line = line;
-		this.line.addBus(this);
-		
+		this.linhaIqr = line;
+		this.linhaIqr.addBus(this);
+
 		this.routePosition = new Ponto(latitude, longitude);
 		this.distancePosition = new Ponto(0, 0);
 		this.pontoDaRotaMaisProximo = getPontoDaRotaMaisProximoPosicaoAtual();
@@ -54,7 +54,7 @@ public class OnibusIqr {
 	 */
 	public boolean move(double distance) {
 		double currentLongitude = this.distancePosition.getLongitude();
-		double routeSize = this.line.getRoute().getRouteSize();
+		double routeSize = this.linhaIqr.getRoute().getRouteSize();
 
 		if (distance < routeSize) {
 			double sumCurrentLongitudeAndDistance = currentLongitude + distance;
@@ -83,7 +83,7 @@ public class OnibusIqr {
 	}
 
 	public Ponto getPontoDaRotaMaisProximoPosicaoAtual() {
-		Route route = line.getRoute();
+		Route route = linhaIqr.getRoute();
 		double distancia = route.getPointAtIndex(0).getDistanceToPoint(this.getRoutePosition());
 		Ponto ponto = route.getPointAtIndex(0);
 		for (int index = 1; index < route.getPointsQuantity(); index++) {
