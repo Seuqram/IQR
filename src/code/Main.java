@@ -1,8 +1,23 @@
 package code;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.zip.ZipFile;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import br.unirio.onibus.api.download.BaixadorPosicaoVeiculos;
 import br.unirio.onibus.api.model.ConjuntoLinhas;
@@ -11,6 +26,7 @@ import br.unirio.onibus.api.model.PosicaoVeiculo;
 import br.unirio.onibus.api.model.Repositorio;
 import br.unirio.onibus.api.model.Veiculo;
 import br.unirio.onibus.api.support.geo.PosicaoMapa;
+import br.unirio.onibus.iqr.CalculadorIQR;
 
 public class Main {
 
@@ -21,15 +37,141 @@ public class Main {
 
 	public static void main(String[] args) throws IOException {
 		// ConjuntoLinhas linhas = new BaixadorPosicaoVeiculos().baixa();
-		ConjuntoLinhas linhas = new BaixadorPosicaoVeiculos().carrega("data/instantaneo.csv");
-		Linha linha = linhas.pegaLinha(numeroLinha);
+		// ConjuntoLinhas c = new BaixadorPosicaoVeiculos().carrega("data/onibus.json");
 		Repositorio repositorio = new Repositorio("data");
-		repositorio.carregaTrajeto(linha, idTrajeto);
-		List<Veiculo> listaDeVeiculosDaLinha = (List<Veiculo>) linha.getVeiculos();
-		List<PosicaoMapa> listaPosicoesTrajetoria = getListaPosicoesTrajetoria(linha);
-		System.out
-				.println(CalculadorIQR.getInstance().getQualidadeRota(listaDeVeiculosDaLinha, listaPosicoesTrajetoria));
-		LinePrinter.getInstance().publicaMapaHTML(listaDeVeiculosDaLinha, listaPosicoesTrajetoria);
+		Scanner file = new Scanner(new File("data/trajetos.txt"));
+		Map<String, String> map = new HashMap<>();
+		Map<String, Boolean> mapC = new HashMap<>();
+		String linhaArquivoTrajetos = file.nextLine();
+		linhaArquivoTrajetos = linhaArquivoTrajetos.substring(1, linhaArquivoTrajetos.length() - 1);
+		while (file.hasNextLine()) {
+			String l = "";
+			String t = "";
+			boolean acheiLinha = false;
+			boolean acheiTrajeto = false;
+			for (int i = 0; i < linhaArquivoTrajetos.length(); i++) {
+				if (!acheiTrajeto) {
+					char charAt = linhaArquivoTrajetos.charAt(i);
+					if (!Character.isLetter(charAt) && !Character.isDigit(charAt)) {
+						if (acheiLinha) {
+							acheiTrajeto = true;
+						} else {
+							acheiLinha = true;
+						}
+					} else {
+						if (acheiLinha) {
+							t += charAt;
+						} else {
+							l += charAt;
+						}
+					}
+				}
+			}
+			map.put(l, t);
+			mapC.put(l, false);
+			linhaArquivoTrajetos = file.nextLine();
+		}
+		List<ResultadoIQR> lista = new ArrayList<>();
+		// ConjuntoLinhas linhas = new
+		// BaixadorPosicaoVeiculos().carrega("data/onibus.csv");
+		// for (Iterator<Linha> iterator = linhas.getLinhas().iterator();
+		// iterator.hasNext();) {
+		// Linha linha = iterator.next();
+		// String identificadorLinha = map.get(linha.getIdentificador());
+		// if (identificadorLinha != null) {
+		// repositorio.carregaTrajeto(linha, identificadorLinha);
+		// CalculadorIQR calculador = new CalculadorIQR();
+		// ResultadoIQR resultado = new ResultadoIQR();
+		// resultado.setLinha(linha);
+		// resultado.setDataHora(LocalDateTime.now());
+		// resultado.setIqr(calculador.executa(linha));
+		// System.out.println(resultado.getIqr());
+		// lista.add(resultado);
+		// }
+		// }
+
+		// System.out.println(lista.size());
+		// file.close();
+		// List<Veiculo> listaDeVeiculosDaLinha = (List<Veiculo>) linha.getVeiculos();
+		// List<PosicaoMapa> listaPosicoesTrajetoria =
+		// getListaPosicoesTrajetoria(linha);
+		// System.out
+		List<String> arquivos = new ArrayList<>();
+		populaListaDiretorios(new File("Marco/"), arquivos);
+		LocalDateTime now = LocalDateTime.now();
+		int size = arquivos.size();
+		CalculadorIQR calculador = new CalculadorIQR();
+		BaixadorPosicaoVeiculos baixador = new BaixadorPosicaoVeiculos();
+		PrintWriter writer = new PrintWriter("the-file-name.txt", "UTF-8");
+		
+
+		JSONArray company = new JSONArray();
+		for (int index = 0; index < size; index++) {
+			String arquivo = arquivos.get(index);
+			System.out.println((index + 1) + "/" + size + " - inicio");
+			List<String> ex = new ArrayList<>();
+			try {
+				ZipFile zip = new ZipFile(arquivo);
+				InputStream input = zip.getInputStream(zip.entries().nextElement());
+				BufferedReader br = new BufferedReader(new InputStreamReader(input));
+				ConjuntoLinhas linhas = baixador.carrega(br);
+				for (Iterator<Linha> iterator = linhas.getLinhas().iterator(); iterator.hasNext();) {
+					Linha linha = iterator.next();
+					if (linha.contaVeiculos() > 2) {
+						String identificadorLinha = map.get(linha.getIdentificador());
+						if (identificadorLinha != null) {
+							repositorio.carregaTrajeto(linha, identificadorLinha);
+							ResultadoIQR resultado = new ResultadoIQR();
+							resultado.setLinha(linha);
+							resultado.setDataHora(now);
+							try {
+								resultado.setIqr(calculador.executa(linha));
+								JSONObject obj = new JSONObject();
+								obj.put("linha", resultado.getLinha().getIdentificador());
+								obj.put("iqr", resultado.getIqr());
+								company.add(obj);
+//								writer.println(linha.getIdentificador() + " | " + calculador.executa(linha));
+							} catch (Exception e) {
+								ex.add(linha.getIdentificador());
+							}
+						}
+					}
+
+				}
+//				System.out.println("E: " + ex.size());
+//				System.out.println(lista.size());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			System.out.println((index + 1) + "/" + size + " - fim");
+		}
+		try (FileWriter filee = new FileWriter("result/result.json")) {
+			filee.write(company.toJSONString());
+			System.out.println("Successfully Copied JSON Object to File...");
+		}
+		// .println(CalculadorIQR.getInstance().getQualidadeRota(listaDeVeiculosDaLinha,
+		// listaPosicoesTrajetoria));
+		// File folder = new File("data/");
+		//
+		// for (int i = 0; i < folder.listFiles().length; i++) {
+		// File string = folder.listFiles()[i];
+		// System.out.println(string.getName());
+		// }
+	}
+
+	private static void populaListaDiretorios(File file, List<String> arquivos) {
+		if (!file.isFile()) {
+			File[] listFiles = file.listFiles();
+			for (int i = 0; i < listFiles.length; i++) {
+				File subFile = listFiles[i];
+				if (subFile.isFile()) {
+					arquivos.add(subFile.getPath());
+				} else {
+					populaListaDiretorios(subFile, arquivos);
+				}
+			}
+		}
 	}
 
 	private static List<PosicaoMapa> getListaPosicoesTrajetoria(Linha linha) {
