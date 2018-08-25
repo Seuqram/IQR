@@ -3,6 +3,7 @@ package code;
 import br.unirio.onibus.api.download.BaixadorPosicaoVeiculos;
 import br.unirio.onibus.api.model.*;
 import br.unirio.onibus.api.support.geo.PosicaoMapa;
+import modelo.Bairro;
 import modelo.LinhaIqr;
 import modelo.OnibusIqr;
 import modelo.ResultadoIQR;
@@ -18,13 +19,42 @@ import java.util.zip.ZipFile;
 public class Main {
 
     public static void main(String[] args) {
+//        try {
+//            calculaIqrSalvaJson();
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+        List<String> nomesBairros = new ArrayList<>();
         try {
-            calculaIqrSalvaJson();
+            Scanner arquivoBairros = new Scanner(new File("data/bairros.xml"));
+            while (arquivoBairros.hasNext()){
+                String next = arquivoBairros.next();
+                if (next.contains("NOME")){
+                    String nextNext = arquivoBairros.next();
+                    if (!nextNext.contains("type")){
+                        StringBuilder nomeBairro = new StringBuilder();
+                        nomeBairro.append(next.replace("name=\"NOME\">", ""));
+                        while(!nextNext.contains("SimpleData")){
+                            nomeBairro.append(" ");
+                            nomeBairro.append(nextNext);
+                            nextNext = arquivoBairros.next();
+                        }
+                        nomesBairros.add(nomeBairro.toString());
+                    }
+                }
+            }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
+        List<Bairro> bairros = new ArrayList<>();
+        for (String nomesBairro : nomesBairros) {
+            Bairro bairro = new Bairro();
+            bairro.setNome(nomesBairro);
+            bairros.add(bairro);
+        }
+        System.out.println();
     }
 
     private static void calculaIqrSalvaJson() throws IOException {

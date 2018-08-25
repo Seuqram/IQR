@@ -1,8 +1,11 @@
 package modelo;
 
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 /**
  * Class that represents a point in cartesian plain with
@@ -11,12 +14,19 @@ import lombok.Setter;
  * @author Rodrigo
  */
 
-@Getter
-@Setter
-@AllArgsConstructor
+@Data
 public class Ponto {
+
     private double latitude;
+
     private double longitude;
+
+    private List<Bairro> listaBairros;
+
+    public Ponto(double latitude, double longitude) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
 
     /**
      * @param givenPoint
