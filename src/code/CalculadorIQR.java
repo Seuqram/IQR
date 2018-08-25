@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import br.unirio.onibus.api.model.Linha;
 import org.decimal4j.util.DoubleRounder;
 
 import br.unirio.onibus.api.model.PosicaoVeiculo;
@@ -151,4 +152,8 @@ public class CalculadorIQR {
 		});
 		return linhaIqr;
 	}
+
+    public double executa(Linha linha) {
+		return new br.unirio.onibus.iqr.CalculadorIQR().executa(linha);
+    }
 }

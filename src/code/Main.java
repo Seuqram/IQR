@@ -1,32 +1,15 @@
 package code;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.zip.ZipFile;
-
+import br.unirio.onibus.api.download.BaixadorPosicaoVeiculos;
+import br.unirio.onibus.api.model.*;
+import br.unirio.onibus.api.support.geo.PosicaoMapa;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import br.unirio.onibus.api.download.BaixadorPosicaoVeiculos;
-import br.unirio.onibus.api.model.ConjuntoLinhas;
-import br.unirio.onibus.api.model.Linha;
-import br.unirio.onibus.api.model.PosicaoVeiculo;
-import br.unirio.onibus.api.model.Repositorio;
-import br.unirio.onibus.api.model.Veiculo;
-import br.unirio.onibus.api.support.geo.PosicaoMapa;
-import br.unirio.onibus.iqr.CalculadorIQR;
+import java.io.*;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.zip.ZipFile;
 
 public class Main {
 
@@ -100,7 +83,7 @@ public class Main {
 		populaListaDiretorios(new File("Marco/"), arquivos);
 		LocalDateTime now = LocalDateTime.now();
 		int size = arquivos.size();
-		CalculadorIQR calculador = new CalculadorIQR();
+		CalculadorIQR calculador = CalculadorIQR.getInstance();
 		BaixadorPosicaoVeiculos baixador = new BaixadorPosicaoVeiculos();
 		PrintWriter writer = new PrintWriter("the-file-name.txt", "UTF-8");
 		
