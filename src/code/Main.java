@@ -10,7 +10,15 @@ import modelo.ResultadoIQR;
 import org.javatuples.Pair;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -26,35 +34,30 @@ public class Main {
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
+
         List<String> nomesBairros = new ArrayList<>();
         try {
-            Scanner arquivoBairros = new Scanner(new File("data/bairros.xml"));
-            while (arquivoBairros.hasNext()){
-                String next = arquivoBairros.next();
-                if (next.contains("NOME")){
-                    String nextNext = arquivoBairros.next();
-                    if (!nextNext.contains("type")){
-                        StringBuilder nomeBairro = new StringBuilder();
-                        nomeBairro.append(next.replace("name=\"NOME\">", ""));
-                        while(!nextNext.contains("SimpleData")){
-                            nomeBairro.append(" ");
-                            nomeBairro.append(nextNext);
-                            nextNext = arquivoBairros.next();
-                        }
-                        nomesBairros.add(nomeBairro.toString());
-                    }
-                }
+            File fxmlFile = new File("data/bairros.xml");
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = null;
+            dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(fxmlFile);
+            doc.getDocumentElement().normalize();
+            NodeList nList = doc.getElementsByTagName("Placemark");
+            for (int i = 0; i < nList.getLength(); i++) {
+                Node item = nList.item(i);
+                Element eElement = (Element) item;
+                String nomeBairro = ((Element) eElement.getChildNodes().item(3).getChildNodes().item(0)).getElementsByTagName("SimpleData").item(2).getTextContent();
+                nomesBairros.add(nomeBairro);
             }
-        } catch (FileNotFoundException e) {
+            System.out.println("Root element :" + doc.getDocumentElement().getNodeName());
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        List<Bairro> bairros = new ArrayList<>();
-        for (String nomesBairro : nomesBairros) {
-            Bairro bairro = new Bairro();
-            bairro.setNome(nomesBairro);
-            bairros.add(bairro);
-        }
-        System.out.println();
     }
 
     private static void calculaIqrSalvaJson() throws IOException {
