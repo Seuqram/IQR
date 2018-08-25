@@ -17,7 +17,17 @@ import java.util.zip.ZipFile;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
+        try {
+            calculaIqrSalvaJson();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void calculaIqrSalvaJson() throws IOException {
         Repositorio repositorio = new Repositorio("data");
         Scanner arquivoTrajetos = new Scanner(new File("data/trajetos.txt"));
 
@@ -63,14 +73,13 @@ public class Main {
 
                 }
             } catch (IOException e) {
-                System.out.println("Exceção no arquivo " + nomeArquivoComPosicoes);
+                System.out.println("Exceção na extração do arquivo " + nomeArquivoComPosicoes);
             }
             System.out.println((index + 1) + "/" + quantidadeArquivosComPosicoes + " - fim");
         }
-        try (FileWriter fileWriter = new FileWriter("result/result.json")) {
-            fileWriter.write(company.toJSONString());
-            System.out.println("Successfully Copied JSON Object to File...");
-        }
+        FileWriter fileWriter = new FileWriter("result/result.json");
+        fileWriter.write(company.toJSONString());
+        System.out.println("Successfully Copied JSON Object to File...");
     }
 
     private static Pair<String, String> getLinhaECodigoTrajeto(String linhaArquivoTrajetos) {
