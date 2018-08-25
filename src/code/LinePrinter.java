@@ -1,5 +1,16 @@
 package code;
 
+import br.unirio.onibus.api.gmaps.dinamico.DecoradorCaminhoEstaticoLinha;
+import br.unirio.onibus.api.gmaps.dinamico.DecoradorPosicaoEstaticaMarcador;
+import br.unirio.onibus.api.gmaps.dinamico.GeradorMapas;
+import br.unirio.onibus.api.model.Trajetoria;
+import br.unirio.onibus.api.model.Veiculo;
+import br.unirio.onibus.api.support.geo.PosicaoMapa;
+import modelo.LinhaIqr;
+import modelo.OnibusIqr;
+import modelo.Ponto;
+import modelo.RotaIqr;
+
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
@@ -8,13 +19,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-
-import br.unirio.onibus.api.gmaps.dinamico.DecoradorCaminhoEstaticoLinha;
-import br.unirio.onibus.api.gmaps.dinamico.DecoradorPosicaoEstaticaMarcador;
-import br.unirio.onibus.api.gmaps.dinamico.GeradorMapas;
-import br.unirio.onibus.api.model.Trajetoria;
-import br.unirio.onibus.api.model.Veiculo;
-import br.unirio.onibus.api.support.geo.PosicaoMapa;
 
 public class LinePrinter {
 	private static LinePrinter printer = null;

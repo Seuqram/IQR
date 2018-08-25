@@ -1,10 +1,10 @@
-package code;
-
-import java.time.LocalDateTime;
+package modelo;
 
 import br.unirio.onibus.api.model.Linha;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Setter

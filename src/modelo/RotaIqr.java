@@ -1,4 +1,6 @@
-package code;
+package modelo;
+
+import modelo.Ponto;
 
 import java.util.ArrayList;
 import java.util.List;
