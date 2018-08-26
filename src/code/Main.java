@@ -47,10 +47,10 @@ public class Main {
             for (int i = 0; i < nList.getLength(); i++) {
                 Node item = nList.item(i);
                 Element eElement = (Element) item;
-                String nomeBairro = ((Element) eElement.getChildNodes().item(3).getChildNodes().item(0)).getElementsByTagName("SimpleData").item(2).getTextContent();
-                nomesBairros.add(nomeBairro);
+                String nomeBairroXml = ((Element) eElement.getChildNodes().item(3).getChildNodes().item(0)).getElementsByTagName("SimpleData").item(2).getTextContent();
+                nomesBairros.add(getNomeBairroFromXml(nomeBairroXml));
+//                String coordenadas = eElement.getChildNodes().item(5).getChildNodes().item(0).getChildNodes().item(0).getChildNodes().item(0).getTextContent();
             }
-            System.out.println("Root element :" + doc.getDocumentElement().getNodeName());
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         } catch (SAXException e) {
@@ -58,6 +58,28 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        List<Bairro> bairros = new ArrayList<>();
+        for (String nomeBairro : nomesBairros) {
+            Bairro bairro = new Bairro();
+            bairro.setNome(nomeBairro);
+            bairros.add(bairro);
+        }
+        System.out.println();
+    }
+
+    private static String getNomeBairroFromXml(String nomeBairroXml) {
+        StringBuilder nomeBairro = new StringBuilder();
+        String[] nomeBairroSplit = nomeBairroXml.split(" ");
+        if (nomeBairroSplit.length > 1) {
+            for (String itemNomeBairro : nomeBairroSplit) {
+                nomeBairro.append(itemNomeBairro);
+                nomeBairro.append(" ");
+            }
+            nomeBairro.deleteCharAt(nomeBairro.length() - 1);
+        } else {
+            nomeBairro.append(nomeBairroSplit[0]);
+        }
+        return nomeBairro.toString();
     }
 
     private static void calculaIqrSalvaJson() throws IOException {
