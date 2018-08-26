@@ -2,10 +2,12 @@ package modelo;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class Bairro {
 
     private String nome;
 
-    private RotaIqr rota;
+    private List<Ponto> divisas;
 }
