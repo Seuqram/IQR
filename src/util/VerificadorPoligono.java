@@ -1,5 +1,6 @@
 package util;
 
+import br.unirio.onibus.api.support.geo.PosicaoMapa;
 import modelo.Ponto;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public class VerificadorPoligono {
         return instance;
     }
 
-    public static boolean onSegment(Ponto p, Ponto q, Ponto r) {
+    public boolean onSegment(Ponto p, Ponto q, Ponto r) {
         if (q.getLatitude() <= Math.max(p.getLatitude(), r.getLatitude())) {
             if (q.getLatitude() >= Math.min(p.getLatitude(), r.getLatitude())) {
                 if (q.getLongitude() <= Math.max(p.getLongitude(), r.getLongitude())) {
@@ -31,29 +32,29 @@ public class VerificadorPoligono {
         return false;
     }
 
-    public static int orientation(Ponto p, Ponto q, Ponto r) {
-        int qx = (int) q.getLatitude();
-        int qy = (int) q.getLongitude();
+    public long orientation(Ponto p, Ponto q, Ponto r) {
+        long qx = (long) (q.getLatitude() * 1000000);
+        long qy = (long) (q.getLongitude() * 1000000);
 
-        int px = (int) p.getLatitude();
-        int py = (int) p.getLongitude();
+        long px = (long) (p.getLatitude() * 1000000);
+        long py = (long) (p.getLongitude() * 1000000);
 
-        int rx = (int) r.getLatitude();
-        int ry = (int) r.getLongitude();
+        long rx = (long) (r.getLatitude() * 1000000);
+        long ry = (long) (r.getLongitude() * 1000000);
 
-        int val = ((qy - py) * (rx - qx)) - ((qx - px) * (ry - qy));
+        long val = ((qy - py) * (rx - qx)) - ((qx - px) * (ry - qy));
 
         if (val == 0)
             return 0;
         return (val > 0) ? 1 : 2;
     }
 
-    public static boolean doIntersect(Ponto p1, Ponto q1, Ponto p2, Ponto q2) {
+    public boolean dolongersect(Ponto p1, Ponto q1, Ponto p2, Ponto q2) {
 
-        int o1 = orientation(p1, q1, p2);
-        int o2 = orientation(p1, q1, q2);
-        int o3 = orientation(p2, q2, p1);
-        int o4 = orientation(p2, q2, q1);
+        long o1 = orientation(p1, q1, p2);
+        long o2 = orientation(p1, q1, q2);
+        long o3 = orientation(p2, q2, p1);
+        long o4 = orientation(p2, q2, q1);
 
         if (o1 != o2 && o3 != o4)
             return true;
@@ -73,19 +74,20 @@ public class VerificadorPoligono {
         return false;
     }
 
-    public static boolean isInside(List<Ponto> polygon, int n, Ponto p) {
-        int INF = 10000;
+    public boolean isInside(List<Ponto> polygon, int n, Ponto p) {
+        long INF = 10000;
         if (n < 3)
             return false;
 
-        Ponto extreme = new Ponto(INF, p.getLongitude());
+        Ponto extreme = new Ponto(p.getLatitude(), INF);
 
         int count = 0, i = 0;
         do {
             int next = (i + 1) % n;
-            if (doIntersect(polygon.get(i), polygon.get(next), p, extreme)) {
-                if (orientation(polygon.get(i), p, polygon.get(next)) == 0)
+            if (dolongersect(polygon.get(i), polygon.get(next), p, extreme)) {
+                if (orientation(polygon.get(i), p, polygon.get(next)) == 0) {
                     return onSegment(polygon.get(i), p, polygon.get(next));
+                }
 
                 count++;
             }
@@ -94,5 +96,9 @@ public class VerificadorPoligono {
 
         return (count & 1) == 1 ? true : false;
     }
-    
+
+    public boolean isInside(List<Ponto> divisas, PosicaoMapa posicao) {
+        Ponto p = new Ponto(posicao.getLatitude(), posicao.getLongitude());
+        return this.isInside(divisas, divisas.size(), p);
+    }
 }
