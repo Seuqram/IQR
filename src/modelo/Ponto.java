@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -68,8 +69,8 @@ public class Ponto {
      * Receives latitude and longitude (in that order) and return
      * if the instance point has the same atributtes
      *
-     * @param latitude
-     * @param longitude
+     * @param givenLongitude
+     * @param givenLatitude
      * @return if the instance point has same latitude and longitude
      */
     public boolean equals(double givenLatitude, double givenLongitude) {
@@ -79,4 +80,10 @@ public class Ponto {
         return false;
     }
 
+    public void addBairro(Bairro bairro) {
+        if (this.listaBairros == null) {
+            this.listaBairros = new ArrayList<>();
+        }
+        this.listaBairros.add(bairro);
+    }
 }

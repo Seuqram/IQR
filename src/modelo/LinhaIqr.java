@@ -1,12 +1,12 @@
 package modelo;
 
-import lombok.Getter;
-import modelo.OnibusIqr;
-import modelo.Ponto;
-import modelo.RotaIqr;
+import br.unirio.onibus.api.model.Linha;
+import br.unirio.onibus.api.support.geo.PosicaoMapa;
+import lombok.Data;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -14,92 +14,48 @@ import java.util.List;
  *
  * @author rodrigo
  */
+@Data
 public class LinhaIqr {
 
-    @Getter
-    private int number;
+    Linha linha;
 
-    @Getter
-    private RotaIqr rotaIqr;
+    List<Ponto> pontosComBairro;
 
-    private List<OnibusIqr> listaOnibusIqr;
+    private static final String COMMA_DELIMITER = ",";
 
-    /**
-     * Constructor that receives a number and instantiate a new Route
-     *
-     * @param number can not be changed after being set
-     */
-    public LinhaIqr(int number) {
-        this.number = number;
-        this.rotaIqr = new RotaIqr();
-        this.listaOnibusIqr = new ArrayList<>();
-    }
+    private static final String NEW_LINE_SEPARATOR = "\n";
 
-    /**
-     * Adds a bus to the line's bus list
-     *
-     * @param bus
-     */
-    public boolean addBus(OnibusIqr bus) {
-        int previousBusQuantity = this.listaOnibusIqr.size();
-        listaOnibusIqr.add(bus);
-        int currentBusQuantity = this.listaOnibusIqr.size();
-        return currentBusQuantity - previousBusQuantity == 1;
-    }
+    private static final String FILE_HEADER = "coordenada, nome";
 
-    /**
-     * @return the relation between the routeSize and the busQuantity
-     */
-    public double getExpectedBusDistance() {
-        double routeSize = this.rotaIqr.getRouteSize();
-        int busQuantity = this.listaOnibusIqr.size();
-        return routeSize / busQuantity;
-    }
-
-    /**
-     * Sort the line's bus list by the proximity to the beginning of the route. The
-     * first bus is the farther from the beginning and the last is the closer.
-     */
-    public void sortBusList() {
-        this.listaOnibusIqr.sort(Comparator.comparing(OnibusIqr::getLongitudeDistancePosition));
-    }
-
-    /**
-     * Return the bus at the given index
-     *
-     * @param index
-     * @return
-     */
-    public OnibusIqr getBusAtIndex(int index) {
-        return this.listaOnibusIqr.get(index);
-    }
-
-    public int getBusQuantity() {
-        return this.listaOnibusIqr.size();
-
-    }
-
-    /**
-     * @return if all buses on the line are in the exact same position
-     */
-    public boolean busesOnSamePosition() {
-        Ponto basePoint = this.listaOnibusIqr.get(0).getDistancePosition();
-        boolean samePosition = true;
-        for (OnibusIqr bus : this.listaOnibusIqr) {
-            if (samePosition) {
-                if (!bus.getDistancePosition().equals(basePoint)) {
-                    samePosition = false;
-                }
-            }
+    public void addPonto(Ponto ponto) {
+        if (this.pontosComBairro == null) {
+            this.pontosComBairro = new ArrayList<>();
         }
-        return samePosition;
+        this.pontosComBairro.add(ponto);
     }
 
-    public void addPointToRoute(Ponto point) {
-        addPointToRoute(point.getLatitude(), point.getLongitude());
+    public void addPonto(PosicaoMapa posicaoMapa, Bairro bairro) {
+        Ponto ponto = new Ponto(posicaoMapa.getLatitude(), posicaoMapa.getLongitude());
+        ponto.addBairro(bairro);
+        this.addPonto(ponto);
     }
 
-    public void addPointToRoute(Double latitude, Double longitude) {
-        this.getRotaIqr().addPoint(latitude, longitude);
+    public void writeCsv() throws IOException {
+        FileWriter fileWriter = new FileWriter("coord.csv");
+        fileWriter.append(FILE_HEADER);
+        fileWriter.append(NEW_LINE_SEPARATOR);
+        for (Ponto ponto : this.pontosComBairro) {
+            fileWriter.append(String.valueOf(ponto.getLatitude()));
+            fileWriter.append(" ");
+            fileWriter.append(String.valueOf(ponto.getLongitude()));
+            fileWriter.append(COMMA_DELIMITER);
+            for (Bairro bairro : ponto.getListaBairros()) {
+                fileWriter.append(bairro.getNome());
+                fileWriter.append(" | ");
+            }
+            fileWriter.append(NEW_LINE_SEPARATOR);
+        }
+        fileWriter.flush();
+        fileWriter.close();
     }
 }

@@ -1,11 +1,13 @@
 package code;
 
 import br.unirio.onibus.api.download.BaixadorPosicaoVeiculos;
-import br.unirio.onibus.api.model.*;
+import br.unirio.onibus.api.model.ConjuntoLinhas;
+import br.unirio.onibus.api.model.Linha;
+import br.unirio.onibus.api.model.Repositorio;
 import br.unirio.onibus.api.support.geo.PosicaoMapa;
 import modelo.Bairro;
 import modelo.LinhaIqr;
-import modelo.OnibusIqr;
+import modelo.Ponto;
 import modelo.ResultadoIQR;
 import org.javatuples.Pair;
 import org.json.simple.JSONArray;
@@ -15,6 +17,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import util.VerificadorPoligono;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -35,36 +38,85 @@ public class Main {
 //            e.printStackTrace();
 //        }
 
-        List<String> nomesBairros = new ArrayList<>();
         try {
-            File fxmlFile = new File("data/bairros.xml");
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = null;
-            dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(fxmlFile);
-            doc.getDocumentElement().normalize();
-            NodeList nList = doc.getElementsByTagName("Placemark");
-            for (int i = 0; i < nList.getLength(); i++) {
-                Node item = nList.item(i);
-                Element eElement = (Element) item;
-                String nomeBairroXml = ((Element) eElement.getChildNodes().item(3).getChildNodes().item(0)).getElementsByTagName("SimpleData").item(2).getTextContent();
-                nomesBairros.add(getNomeBairroFromXml(nomeBairroXml));
-//                String coordenadas = eElement.getChildNodes().item(5).getChildNodes().item(0).getChildNodes().item(0).getChildNodes().item(0).getTextContent();
+            List<Bairro> bairros = getListaBairros();
+            Repositorio repositorio = new Repositorio("data");
+            Scanner arquivoTrajetos = null;
+            arquivoTrajetos = new Scanner(new File("data/trajetos.txt"));
+            Map<String, String> linhaCodigoTrajetoMap = getLinhaTrajetoMap(arquivoTrajetos);
+            for (Map.Entry<String, String> entry : linhaCodigoTrajetoMap.entrySet()) {
+                Linha linha = new Linha(entry.getKey());
+                LinhaIqr linhaIqr = new LinhaIqr();
+                linhaIqr.setLinha(linha);
+                repositorio.carregaTrajeto(linha, entry.getValue());
+                for (PosicaoMapa posicao : linha.getTrajetoIda().pegaPosicoes()) {
+                    VerificadorPoligono verificadorPoligono = VerificadorPoligono.getInstance();
+                    for (Bairro bairro : bairros) {
+                        if (verificadorPoligono.isInside(bairro.getDivisas(), posicao)) {
+                            linhaIqr.addPonto(posicao, bairro);
+                        }
+                    }
+                }
+                linhaIqr.writeCsv();
             }
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
-        } catch (SAXException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private static List<Bairro> getListaBairros() throws ParserConfigurationException, IOException, SAXException {
+        File fxmlFile = new File("data/bairros.xml");
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder dBuilder = null;
+        dBuilder = dbFactory.newDocumentBuilder();
+        Document doc = dBuilder.parse(fxmlFile);
+        doc.getDocumentElement().normalize();
+        NodeList nList = doc.getElementsByTagName("Placemark");
+        List<Pair<String, List<Ponto>>> pairList = new ArrayList<>();
+        for (int i = 0; i < nList.getLength(); i++) {
+            Node item = nList.item(i);
+            Element eElement = (Element) item;
+            String nomeBairroXml = ((Element) eElement.getChildNodes().item(3).getChildNodes().item(0)).getElementsByTagName("SimpleData").item(2).getTextContent();
+            String coordenadas = eElement.getChildNodes().item(5).getChildNodes().item(0).getChildNodes().item(0).getChildNodes().item(0).getTextContent();
+            Pair<String, List<Ponto>> pair = new Pair<String, List<Ponto>>(getNomeBairroFromXml(nomeBairroXml), getPontoList(coordenadas));
+            pairList.add(pair);
         }
         List<Bairro> bairros = new ArrayList<>();
-        for (String nomeBairro : nomesBairros) {
+        for (Pair<String, List<Ponto>> pair : pairList) {
             Bairro bairro = new Bairro();
-            bairro.setNome(nomeBairro);
+            bairro.setNome(pair.getValue0());
+            bairro.setDivisas(pair.getValue1());
             bairros.add(bairro);
         }
-        System.out.println();
+        return bairros;
+    }
+
+    private static List<Ponto> getPontoList(String coordenadas) {
+        List<Ponto> pontos = new ArrayList<>();
+        String[] pontoSeparado = new String[2];
+        int i = 0;
+        for (String coordenada : coordenadas.split(",")) {
+            String[] vetorCoordenadas = coordenada.split(" ");
+            if (vetorCoordenadas.length > 1) {
+                pontos.add(getPonto(vetorCoordenadas));
+            } else {
+                pontoSeparado[i] = vetorCoordenadas[0];
+                i++;
+            }
+        }
+        pontos.add(getPonto(pontoSeparado));
+        return pontos;
+    }
+
+    private static Ponto getPonto(String[] coordenada) {
+        double latitude = Double.valueOf(coordenada[0]);
+        double longitude = Double.valueOf(coordenada[1]);
+        return new Ponto(latitude, longitude);
     }
 
     private static String getNomeBairroFromXml(String nomeBairroXml) {
@@ -209,18 +261,18 @@ public class Main {
         return listaPosicoesTrajetoria;
     }
 
-    @SuppressWarnings("unused")
-    private static LinhaIqr getLinhaComPosicoesDeIdaEVolta(List<Veiculo> listaDeVeiculosDaLinha,
-                                                           List<PosicaoMapa> listaPosicoesTrajetoria) {
-        LinhaIqr line = new LinhaIqr(624);
-        listaPosicoesTrajetoria.forEach(ponto -> {
-            line.addPointToRoute(ponto.getLatitude(), ponto.getLongitude());
-        });
-        listaDeVeiculosDaLinha.forEach(veiculo -> {
-            PosicaoVeiculo next = veiculo.getTrajetoria().getPosicoes().iterator().next();
-            OnibusIqr onibusIqr = new OnibusIqr(veiculo.getNumeroSerie(), line, next.getLatitude(),
-                    next.getLongitude());
-        });
-        return line;
-    }
+//    @SuppressWarnings("unused")
+//    private static LinhaIqr getLinhaComPosicoesDeIdaEVolta(List<Veiculo> listaDeVeiculosDaLinha,
+//                                                           List<PosicaoMapa> listaPosicoesTrajetoria) {
+//        LinhaIqr line = new LinhaIqr(624);
+//        listaPosicoesTrajetoria.forEach(ponto -> {
+//            line.addPontoToRoute(ponto.getLatitude(), ponto.getLongitude());
+//        });
+//        listaDeVeiculosDaLinha.forEach(veiculo -> {
+//            PosicaoVeiculo next = veiculo.getTrajetoria().getPosicoes().iterator().next();
+//            OnibusIqr onibusIqr = new OnibusIqr(veiculo.getNumeroSerie(), line, next.getLatitude(),
+//                    next.getLongitude());
+//        });
+//        return line;
+//    }
 }
