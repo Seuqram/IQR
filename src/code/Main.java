@@ -25,6 +25,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.zip.ZipFile;
 
 public class Main {
@@ -41,40 +42,33 @@ public class Main {
         try {
             List<Bairro> bairros = getListaBairros();
             Repositorio repositorio = new Repositorio("data");
-            Scanner arquivoTrajetos = null;
-            arquivoTrajetos = new Scanner(new File("data/trajetos.txt"));
+            Scanner arquivoTrajetos = new Scanner(new File("data/trajetos.txt"));
             Map<String, String> linhaCodigoTrajetoMap = getLinhaTrajetoMap(arquivoTrajetos);
             List<LinhaIqr> linhasList = new ArrayList<>();
             int numeroLinhas = linhaCodigoTrajetoMap.size();
             int contadorLinhas = 0;
             for (Map.Entry<String, String> entry : linhaCodigoTrajetoMap.entrySet()) {
+                String identificadorLinha = entry.getKey();
+                String codigoTrajeto = entry.getValue();
+
                 System.out.println("Linha " + ++contadorLinhas + "/" + numeroLinhas);
-                Linha linha = new Linha(entry.getKey());
+
+                Linha linha = new Linha(identificadorLinha);
                 LinhaIqr linhaIqr = new LinhaIqr();
-                linhaIqr.setLinha(linha);
-                repositorio.carregaTrajeto(linha, entry.getValue());
-                for (PosicaoMapa posicao : linha.getTrajetoIda().pegaPosicoes()) {
-                    boolean temBairro = false;
+                linhaIqr.setIdentificador(identificadorLinha);
+                repositorio.carregaTrajeto(linha, codigoTrajeto);
+                for (PosicaoMapa posicaoMapa : linha.getTrajetoIda().pegaPosicoes()) {
                     VerificadorPoligono verificadorPoligono = VerificadorPoligono.getInstance();
-                    for (Bairro bairro : bairros) {
-                        if (verificadorPoligono.isInside(bairro.getDivisas(), posicao)) {
-                            linhaIqr.addPonto(posicao, bairro);
-                            temBairro = true;
-                        }
-                    }
-                    if (!temBairro) {
-                        linhaIqr.addPontoSemBairro(posicao);
-                    }
+                    bairros.stream().filter(bairro -> verificadorPoligono.isInside(bairro.getPolygon(), posicaoMapa)).collect(Collectors.toList()).forEach(linhaIqr::addBairro);
                 }
                 linhasList.add(linhaIqr);
-                String filePath = "bairros/" + linhaIqr.getLinha().getIdentificador() + ".csv";
-                FileWriter fileWriter = new FileWriter(filePath);
-                fileWriter.append("Linha, Bairro");
-                fileWriter.append("\n");
-                linhaIqr.addToCsv(fileWriter);
-                fileWriter.flush();
-                fileWriter.close();
+                break;
             }
+
+            for (LinhaIqr linhaIqr : linhasList) {
+                linhaIqr.writeAsCsv();
+            }
+
         } catch (ParserConfigurationException | IOException | SAXException e) {
             e.printStackTrace();
         }

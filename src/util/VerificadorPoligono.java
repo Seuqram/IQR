@@ -34,4 +34,15 @@ public class VerificadorPoligono {
         Ponto p = new Ponto(posicao.getLatitude(), posicao.getLongitude());
         return isInside(pontos, p);
     }
+
+    public boolean isInside(Polygon polygon, PosicaoMapa posicaoMapa){
+        Point point = new Point();
+        point.setX(posicaoMapa.getLatitude());
+        point.setY(posicaoMapa.getLongitude());
+        return isInside(polygon, point);
+    }
+
+    private boolean isInside(Polygon polygon, Point point){
+        return OperatorContains.local().execute(polygon, point, null, null) || OperatorTouches.local().execute(polygon, point, null, null);
+    }
 }
