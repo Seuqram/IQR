@@ -110,7 +110,7 @@ public class RotaIqr {
 		double size = 0;
 		for (int index = 0; index < this.getPointsQuantity(); index++) {
 			Ponto point = this.pontos.get(index);
-			size = size + point.getDistanceToPoint(this.getNextPoint(point));
+//			size = size + point.getDistanceToPoint(this.getNextPoint(point));
 		}
 		return size;
 	}

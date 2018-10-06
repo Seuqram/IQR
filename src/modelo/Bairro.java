@@ -1,5 +1,6 @@
 package modelo;
 
+import com.esri.core.geometry.Point;
 import lombok.Data;
 
 import java.util.List;
@@ -9,5 +10,5 @@ public class Bairro {
 
     private String nome;
 
-    private List<Ponto> divisas;
+    private List<Point> divisas;
 }

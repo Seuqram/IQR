@@ -73,21 +73,21 @@ public class LinePrinter {
 //		}
 //	}
 
-    private Trajetoria getTrajetoriaLocal(int indexPontoAnterior, int indexPontoAtual, RotaIqr rotaIqr) {
-        RotaIqr rota = new RotaIqr();
-        List<PosicaoMapa> list = new ArrayList<>();
-        for (int index = indexPontoAnterior; index <= indexPontoAtual; index++) {
-            Ponto pointAtIndex = rotaIqr.getPointAtIndex(index);
-            rota.addPoint(pointAtIndex);
-            list.add(new PosicaoMapa(pointAtIndex.getLatitude(), pointAtIndex.getLongitude()));
-        }
-        Trajetoria trajetoria = new Trajetoria();
-        for (int index = 0; index < rota.getPointsQuantity(); index++) {
-            Ponto pointAtIndex = rota.getPointAtIndex(index);
-            trajetoria.adiciona(pointAtIndex.getLatitude(), pointAtIndex.getLongitude());
-        }
-        return trajetoria;
-    }
+//    private Trajetoria getTrajetoriaLocal(int indexPontoAnterior, int indexPontoAtual, RotaIqr rotaIqr) {
+//        RotaIqr rota = new RotaIqr();
+//        List<PosicaoMapa> list = new ArrayList<>();
+//        for (int index = indexPontoAnterior; index <= indexPontoAtual; index++) {
+//            Ponto pointAtIndex = rotaIqr.getPointAtIndex(index);
+//            rota.addPoint(pointAtIndex);
+//            list.add(new PosicaoMapa(pointAtIndex.getLatitude(), pointAtIndex.getLongitude()));
+//        }
+//        Trajetoria trajetoria = new Trajetoria();
+//        for (int index = 0; index < rota.getPointsQuantity(); index++) {
+//            Ponto pointAtIndex = rota.getPointAtIndex(index);
+//            trajetoria.adiciona(pointAtIndex.getLatitude(), pointAtIndex.getLongitude());
+//        }
+//        return trajetoria;
+//    }
 
 //	public void printLine(LinhaIqr line) {
 //		printLineRouteData(line);
@@ -103,9 +103,9 @@ public class LinePrinter {
         System.out.println("%");
     }
 
-    public double getDistanceBetweenPoints(Ponto pointOne, Ponto pointTwo) {
-        return pointOne.getDistanceToPoint(pointTwo);
-    }
+//    public double getDistanceBetweenPoints(Ponto pointOne, Ponto pointTwo) {
+//        return pointOne.getDistanceToPoint(pointTwo);
+//    }
 
 //	public void printBusesOnRoute(LinhaIqr line) {
 //		printStartSymbol();

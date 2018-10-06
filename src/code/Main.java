@@ -5,9 +5,9 @@ import br.unirio.onibus.api.model.ConjuntoLinhas;
 import br.unirio.onibus.api.model.Linha;
 import br.unirio.onibus.api.model.Repositorio;
 import br.unirio.onibus.api.support.geo.PosicaoMapa;
+import com.esri.core.geometry.Point;
 import modelo.Bairro;
 import modelo.LinhaIqr;
-import modelo.Ponto;
 import modelo.ResultadoIQR;
 import org.javatuples.Pair;
 import org.json.simple.JSONArray;
@@ -44,50 +44,62 @@ public class Main {
             Scanner arquivoTrajetos = null;
             arquivoTrajetos = new Scanner(new File("data/trajetos.txt"));
             Map<String, String> linhaCodigoTrajetoMap = getLinhaTrajetoMap(arquivoTrajetos);
+            List<LinhaIqr> linhasList = new ArrayList<>();
+            int numeroLinhas = linhaCodigoTrajetoMap.size();
+            int contadorLinhas = 0;
             for (Map.Entry<String, String> entry : linhaCodigoTrajetoMap.entrySet()) {
+                System.out.println("Linha " + ++contadorLinhas + "/" + numeroLinhas);
                 Linha linha = new Linha(entry.getKey());
                 LinhaIqr linhaIqr = new LinhaIqr();
                 linhaIqr.setLinha(linha);
                 repositorio.carregaTrajeto(linha, entry.getValue());
                 for (PosicaoMapa posicao : linha.getTrajetoIda().pegaPosicoes()) {
+                    boolean temBairro = false;
                     VerificadorPoligono verificadorPoligono = VerificadorPoligono.getInstance();
                     for (Bairro bairro : bairros) {
                         if (verificadorPoligono.isInside(bairro.getDivisas(), posicao)) {
                             linhaIqr.addPonto(posicao, bairro);
+                            temBairro = true;
                         }
                     }
+                    if (!temBairro) {
+                        linhaIqr.addPontoSemBairro(posicao);
+                    }
                 }
-                linhaIqr.writeCsv();
+                linhasList.add(linhaIqr);
+                String filePath = "bairros/" + linhaIqr.getLinha().getIdentificador() + ".csv";
+                FileWriter fileWriter = new FileWriter(filePath);
+                fileWriter.append("Linha, Bairro");
+                fileWriter.append("\n");
+                linhaIqr.addToCsv(fileWriter);
+                fileWriter.flush();
+                fileWriter.close();
             }
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SAXException e) {
+        } catch (ParserConfigurationException | IOException | SAXException e) {
             e.printStackTrace();
         }
 
     }
 
     private static List<Bairro> getListaBairros() throws ParserConfigurationException, IOException, SAXException {
-        File fxmlFile = new File("data/bairros.xml");
+        File xmlFile = new File("data/bairros.xml");
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = null;
         dBuilder = dbFactory.newDocumentBuilder();
-        Document doc = dBuilder.parse(fxmlFile);
+        Document doc = dBuilder.parse(xmlFile);
         doc.getDocumentElement().normalize();
         NodeList nList = doc.getElementsByTagName("Placemark");
-        List<Pair<String, List<Ponto>>> pairList = new ArrayList<>();
+        List<Pair<String, List<Point>>> pairList = new ArrayList<>();
         for (int i = 0; i < nList.getLength(); i++) {
             Node item = nList.item(i);
             Element eElement = (Element) item;
             String nomeBairroXml = ((Element) eElement.getChildNodes().item(3).getChildNodes().item(0)).getElementsByTagName("SimpleData").item(2).getTextContent();
             String coordenadas = eElement.getChildNodes().item(5).getChildNodes().item(0).getChildNodes().item(0).getChildNodes().item(0).getTextContent();
-            Pair<String, List<Ponto>> pair = new Pair<String, List<Ponto>>(getNomeBairroFromXml(nomeBairroXml), getPontoList(coordenadas));
+            Pair<String, List<Point>> pair = new Pair<>(getNomeBairroFromXml(nomeBairroXml), getPontoList(coordenadas));
             pairList.add(pair);
         }
         List<Bairro> bairros = new ArrayList<>();
-        for (Pair<String, List<Ponto>> pair : pairList) {
+        for (Pair<String, List<Point>> pair : pairList) {
             Bairro bairro = new Bairro();
             bairro.setNome(pair.getValue0());
             bairro.setDivisas(pair.getValue1());
@@ -96,8 +108,8 @@ public class Main {
         return bairros;
     }
 
-    private static List<Ponto> getPontoList(String coordenadas) {
-        List<Ponto> pontos = new ArrayList<>();
+    private static List<Point> getPontoList(String coordenadas) {
+        List<Point> pontos = new ArrayList<>();
         String[] pontoSeparado = new String[2];
         int i = 0;
         for (String coordenada : coordenadas.split(",")) {
@@ -113,10 +125,10 @@ public class Main {
         return pontos;
     }
 
-    private static Ponto getPonto(String[] coordenada) {
+    private static Point getPonto(String[] coordenada) {
         double latitude = Double.valueOf(coordenada[0]);
         double longitude = Double.valueOf(coordenada[1]);
-        return new Ponto(latitude, longitude);
+        return new Point(latitude, longitude);
     }
 
     private static String getNomeBairroFromXml(String nomeBairroXml) {

@@ -83,17 +83,17 @@ public class CalculadorIQR {
         }
     }
 
-    public double getDistanciaEntreOnibus(RotaIqr rotaIqr, int indexPontoAtual, int indexPontoAnterior) {
-        RotaIqr rotaIqrAux = new RotaIqr();
-        List<PosicaoMapa> list = new ArrayList<>();
-        for (int index = indexPontoAnterior; index <= indexPontoAtual; index++) {
-            Ponto pointAtIndex = rotaIqr.getPointAtIndex(index);
-            rotaIqrAux.addPoint(pointAtIndex);
-            list.add(new PosicaoMapa(pointAtIndex.getLatitude(), pointAtIndex.getLongitude()));
-        }
-        double distanciaEntreOnibus = rotaIqrAux.getRouteSize();
-        return distanciaEntreOnibus;
-    }
+//    public double getDistanciaEntreOnibus(RotaIqr rotaIqr, int indexPontoAtual, int indexPontoAnterior) {
+//        RotaIqr rotaIqrAux = new RotaIqr();
+//        List<PosicaoMapa> list = new ArrayList<>();
+//        for (int index = indexPontoAnterior; index <= indexPontoAtual; index++) {
+//            Ponto pointAtIndex = rotaIqr.getPointAtIndex(index);
+//            rotaIqrAux.addPoint(pointAtIndex);
+//            list.add(new PosicaoMapa(pointAtIndex.getLatitude(), pointAtIndex.getLongitude()));
+//        }
+//        double distanciaEntreOnibus = rotaIqrAux.getRouteSize();
+//        return distanciaEntreOnibus;
+//    }
 
 //    private int getQuantidadeOnibusIgnorados(LinhaIqr linhaIqr) {
 //        RotaIqr rotaIqr = linhaIqr.getRotaIqr();
@@ -154,6 +154,7 @@ public class CalculadorIQR {
 //    }
 
     public double executa(Linha linha) {
-        return new br.unirio.onibus.iqr.CalculadorIQR().executa(linha);
+//        return new br.unirio.onibus.iqr.CalculadorIQR().executa(linha);
+        return 0.0;
     }
 }
