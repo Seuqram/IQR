@@ -37,3 +37,7 @@ hs_err_pid*
 /target/
 
 *.json
+
+\.idea/
+
+*.csv
