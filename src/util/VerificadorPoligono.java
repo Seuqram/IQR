@@ -5,7 +5,6 @@ import com.esri.core.geometry.OperatorContains;
 import com.esri.core.geometry.OperatorTouches;
 import com.esri.core.geometry.Point;
 import com.esri.core.geometry.Polygon;
-import modelo.Ponto;
 
 import java.util.List;
 
