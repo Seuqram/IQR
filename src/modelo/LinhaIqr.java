@@ -22,12 +22,10 @@ public class LinhaIqr {
 
     private static final String FILE_HEADER = "coordenada, nome";
 
-    public void writeAsCsv() throws IOException {
+    public void writeBairrosInCsv() throws IOException {
         System.out.println(this.identificador);
-        String filePath = "bairros/" + this.identificador + "2.csv";
+        String filePath = "bairros/" + this.identificador + ".csv";
         FileWriter fileWriter = new FileWriter(filePath);
-        fileWriter.append("Linha, Bairro");
-
         fileWriter.append("Linha, Bairro");
         fileWriter.append(NEW_LINE_SEPARATOR);
 
@@ -41,6 +39,27 @@ public class LinhaIqr {
         fileWriter.close();
     }
 
+    public void writeIqrInCsv() throws IOException {
+        System.out.println(this.identificador);
+        String filePath = "bairros/" + this.identificador + ".csv";
+        FileWriter fileWriter = new FileWriter(filePath);
+        fileWriter.append("Linha, DataHora, Resultado");
+        fileWriter.append(NEW_LINE_SEPARATOR);
+
+        for (ResultadoIQR iqr : iqrs) {
+            fileWriter.append(this.getIdentificador());
+            fileWriter.append(COMMA_DELIMITER);
+            fileWriter.append(iqr.getDataHora().toString());
+            fileWriter.append(COMMA_DELIMITER);
+            fileWriter.append(String.valueOf(iqr.getValor()));
+            fileWriter.append(NEW_LINE_SEPARATOR);
+        }
+
+        fileWriter.flush();
+        fileWriter.close();
+    }
+
+
     public void addBairro(Bairro bairro) {
         if (this.bairros == null) {
             this.bairros = new ArrayList<>();
@@ -48,5 +67,12 @@ public class LinhaIqr {
         if (!this.bairros.contains(bairro)) {
             this.bairros.add(bairro);
         }
+    }
+
+    public void addResultado(ResultadoIQR resultado) {
+        if (this.iqrs == null) {
+            this.iqrs = new ArrayList<>();
+        }
+        this.iqrs.add(resultado);
     }
 }

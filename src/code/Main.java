@@ -23,7 +23,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipFile;
@@ -31,48 +33,99 @@ import java.util.zip.ZipFile;
 public class Main {
 
     public static void main(String[] args) {
-//        try {
-//            calculaIqrSalvaJson();
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
 
         try {
-            List<Bairro> bairros = getListaBairros();
+
             Repositorio repositorio = new Repositorio("data");
+
+            List<LinhaIqr> linhasList = pegaLinhasComBairros(repositorio);
+
             Scanner arquivoTrajetos = new Scanner(new File("data/trajetos.txt"));
+
             Map<String, String> linhaCodigoTrajetoMap = getLinhaTrajetoMap(arquivoTrajetos);
-            List<LinhaIqr> linhasList = new ArrayList<>();
-            int numeroLinhas = linhaCodigoTrajetoMap.size();
-            int contadorLinhas = 0;
-            for (Map.Entry<String, String> entry : linhaCodigoTrajetoMap.entrySet()) {
-                String identificadorLinha = entry.getKey();
-                String codigoTrajeto = entry.getValue();
 
-                System.out.println("Linha " + ++contadorLinhas + "/" + numeroLinhas);
+            List<String> arquivosComPosicoesList = new ArrayList<>();
+            populaListaDiretorios(new File("Marco/"), arquivosComPosicoesList);
 
-                Linha linha = new Linha(identificadorLinha);
-                LinhaIqr linhaIqr = new LinhaIqr();
-                linhaIqr.setIdentificador(identificadorLinha);
-                repositorio.carregaTrajeto(linha, codigoTrajeto);
-                for (PosicaoMapa posicaoMapa : linha.getTrajetoIda().pegaPosicoes()) {
-                    VerificadorPoligono verificadorPoligono = VerificadorPoligono.getInstance();
-                    bairros.stream().filter(bairro -> verificadorPoligono.isInside(bairro.getPolygon(), posicaoMapa)).collect(Collectors.toList()).forEach(linhaIqr::addBairro);
+            int quantidadeArquivosComPosicoes = arquivosComPosicoesList.size();
+            CalculadorIQR calculador = CalculadorIQR.getInstance();
+            BaixadorPosicaoVeiculos baixador = new BaixadorPosicaoVeiculos();
+
+            for (int index = 0; index < quantidadeArquivosComPosicoes; index++) {
+                String nomeArquivoComPosicoes = arquivosComPosicoesList.get(index);
+                System.out.println((index + 1) + "/" + quantidadeArquivosComPosicoes + " - inicio");
+                LocalDate day = LocalDate.parse(nomeArquivoComPosicoes.substring(6, nomeArquivoComPosicoes.length() - 4).substring(0, 10));
+                int hora = Integer.valueOf(nomeArquivoComPosicoes.substring(17, 19));
+                int minuto = Integer.valueOf(nomeArquivoComPosicoes.substring(20, 22));
+                int segundo = Integer.valueOf(nomeArquivoComPosicoes.substring(23, 25));
+                LocalDateTime dataHora = day.atTime(hora, minuto, segundo);
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+                System.out.println(formatter.format(dataHora));
+                System.out.println();
+                try {
+                    ZipFile arquivoZipado = new ZipFile(nomeArquivoComPosicoes);
+                    InputStream input = arquivoZipado.getInputStream(arquivoZipado.entries().nextElement());
+                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(input));
+                    ConjuntoLinhas conjuntoLinhas = baixador.carrega(bufferedReader);
+                    List<Linha> linhas = new ArrayList<>();
+                    for (Linha linha : conjuntoLinhas.getLinhas()) {
+                        linhas.add(linha);
+                    }
+                    int totalLinhas = linhas.size();
+                    int indiceLinhaAtual = 0;
+                    for (Linha linha : linhas) {
+                        System.out.println("linha " + ++indiceLinhaAtual + "/" + totalLinhas);
+                        if (linha.contaVeiculos() > 2) {
+                            String identificadorLinha = linhaCodigoTrajetoMap.get(linha.getIdentificador());
+                            if (identificadorLinha != null) {
+                                repositorio.carregaTrajeto(linha, identificadorLinha);
+                                ResultadoIQR resultado = new ResultadoIQR();
+                                resultado.setLinha(linha);
+                                resultado.setDataHora(dataHora);
+                                resultado.setValor(calculador.executa(linha));
+                                linhasList.stream()
+                                        .filter(linhaIqr -> linhaIqr.getIdentificador().equals(linha.getIdentificador())).collect(Collectors.toList())
+                                        .forEach(linhaIqr -> linhaIqr.addResultado(resultado));
+                            }
+                        }
+
+                    }
+                } catch (IOException e) {
+                    System.out.println("Exceção na extração do arquivo " + nomeArquivoComPosicoes);
                 }
-                linhasList.add(linhaIqr);
-                break;
-            }
-
-            for (LinhaIqr linhaIqr : linhasList) {
-                linhaIqr.writeAsCsv();
+                System.out.println();
             }
 
         } catch (ParserConfigurationException | IOException | SAXException e) {
             e.printStackTrace();
         }
 
+    }
+
+    private static List<LinhaIqr> pegaLinhasComBairros(Repositorio repositorio) throws IOException, SAXException, ParserConfigurationException {
+        List<Bairro> bairros = getListaBairros();
+        Scanner arquivoTrajetos = new Scanner(new File("data/trajetos.txt"));
+        Map<String, String> linhaCodigoTrajetoMap = getLinhaTrajetoMap(arquivoTrajetos);
+        List<LinhaIqr> linhasList = new ArrayList<>();
+        int numeroLinhas = linhaCodigoTrajetoMap.size();
+        int contadorLinhas = 0;
+        for (Map.Entry<String, String> entry : linhaCodigoTrajetoMap.entrySet()) {
+            String identificadorLinha = entry.getKey();
+            String codigoTrajeto = entry.getValue();
+
+            System.out.println("Linha " + ++contadorLinhas + "/" + numeroLinhas);
+
+            Linha linha = new Linha(identificadorLinha);
+            LinhaIqr linhaIqr = new LinhaIqr();
+            linhaIqr.setIdentificador(identificadorLinha);
+            repositorio.carregaTrajeto(linha, codigoTrajeto);
+            for (PosicaoMapa posicaoMapa : linha.getTrajetoIda().pegaPosicoes()) {
+                VerificadorPoligono verificadorPoligono = VerificadorPoligono.getInstance();
+                bairros.stream().filter(bairro -> verificadorPoligono.isInside(bairro.getPolygon(), posicaoMapa)).collect(Collectors.toList()).forEach(linhaIqr::addBairro);
+            }
+            linhasList.add(linhaIqr);
+        }
+        return linhasList;
     }
 
     private static List<Bairro> getListaBairros() throws ParserConfigurationException, IOException, SAXException {
@@ -173,10 +226,10 @@ public class Main {
                             resultado.setLinha(linha);
                             resultado.setDataHora(agora);
                             try {
-                                resultado.setIqr(calculador.executa(linha));
+                                resultado.setValor(calculador.executa(linha));
                                 JSONObject jsonObject = new JSONObject();
                                 jsonObject.put("linha", resultado.getLinha().getIdentificador());
-                                jsonObject.put("iqr", resultado.getIqr());
+                                jsonObject.put("iqr", resultado.getValor());
                                 company.add(jsonObject);
                             } catch (Exception e) {
                                 listaArquivosComExceptions.add(linha.getIdentificador());

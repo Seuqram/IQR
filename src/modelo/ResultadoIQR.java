@@ -9,7 +9,10 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class ResultadoIQR {
-	Linha linha;
-	double iqr;
-	LocalDateTime dataHora;
+
+    private Linha linha;
+
+    private double valor;
+
+    private LocalDateTime dataHora;
 }
