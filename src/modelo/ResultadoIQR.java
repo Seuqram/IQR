@@ -10,9 +10,12 @@ import java.time.LocalDateTime;
 @Setter
 public class ResultadoIQR {
 
-    private Linha linha;
-
     private double valor;
 
     private LocalDateTime dataHora;
+
+    @Override
+    public String toString(){
+        return this.dataHora.toString() + ": " + this.valor;
+    }
 }

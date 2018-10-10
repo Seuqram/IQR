@@ -22,18 +22,6 @@ public class VerificadorPoligono {
         return instance;
     }
 
-    private static boolean isInside(List<Point> pontoList, Ponto p) {
-        Polygon polygon = new Polygon();
-        polygon.startPath(pontoList.get(0));
-        pontoList.forEach(polygon::lineTo);
-        return OperatorContains.local().execute(polygon, p, null, null) || OperatorTouches.local().execute(polygon, p, null, null);
-    }
-
-    public boolean isInside(List<Point> pontos, PosicaoMapa posicao) {
-        Ponto p = new Ponto(posicao.getLatitude(), posicao.getLongitude());
-        return isInside(pontos, p);
-    }
-
     public boolean isInside(Polygon polygon, PosicaoMapa posicaoMapa){
         Point point = new Point();
         point.setX(posicaoMapa.getLatitude());

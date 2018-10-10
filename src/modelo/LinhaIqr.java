@@ -4,8 +4,11 @@ import lombok.Data;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Data
 public class LinhaIqr {
@@ -24,24 +27,31 @@ public class LinhaIqr {
 
     public void writeBairrosInCsv() throws IOException {
         System.out.println(this.identificador);
-        String filePath = "bairros/" + this.identificador + ".csv";
+        String filePath = "bairros/bairro_" + this.identificador + ".csv";
         FileWriter fileWriter = new FileWriter(filePath);
         fileWriter.append("Linha, Bairro");
         fileWriter.append(NEW_LINE_SEPARATOR);
 
-        for (Bairro bairro : bairros) {
-            fileWriter.append(this.getIdentificador());
-            fileWriter.append(COMMA_DELIMITER);
-            fileWriter.append(bairro.getNome());
-            fileWriter.append(NEW_LINE_SEPARATOR);
+        if (bairros != null) {
+            for (Bairro bairro : bairros) {
+                fileWriter.append(this.getIdentificador());
+                fileWriter.append(COMMA_DELIMITER);
+                fileWriter.append(bairro.getNome());
+                fileWriter.append(NEW_LINE_SEPARATOR);
+            }
         }
         fileWriter.flush();
         fileWriter.close();
     }
 
     public void writeIqrInCsv() throws IOException {
+        String pattern = "### ###.###";
+        DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.getDefault());
+        otherSymbols.setDecimalSeparator('.');
+        otherSymbols.setGroupingSeparator(' ');
+        DecimalFormat df = new DecimalFormat(pattern, otherSymbols);
         System.out.println(this.identificador);
-        String filePath = "bairros/" + this.identificador + ".csv";
+        String filePath = "bairros/iqr_" + this.identificador + ".csv";
         FileWriter fileWriter = new FileWriter(filePath);
         fileWriter.append("Linha, DataHora, Resultado");
         fileWriter.append(NEW_LINE_SEPARATOR);
@@ -51,7 +61,7 @@ public class LinhaIqr {
             fileWriter.append(COMMA_DELIMITER);
             fileWriter.append(iqr.getDataHora().toString());
             fileWriter.append(COMMA_DELIMITER);
-            fileWriter.append(String.valueOf(iqr.getValor()));
+            fileWriter.append(df.format(iqr.getValor() * 100));
             fileWriter.append(NEW_LINE_SEPARATOR);
         }
 
