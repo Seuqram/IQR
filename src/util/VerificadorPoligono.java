@@ -1,10 +1,7 @@
 package util;
 
 import br.unirio.onibus.api.support.geo.PosicaoMapa;
-import com.esri.core.geometry.OperatorContains;
-import com.esri.core.geometry.OperatorTouches;
-import com.esri.core.geometry.Point;
-import com.esri.core.geometry.Polygon;
+import com.esri.core.geometry.*;
 
 import java.util.List;
 
@@ -23,13 +20,11 @@ public class VerificadorPoligono {
     }
 
     public boolean isInside(Polygon polygon, PosicaoMapa posicaoMapa){
-        Point point = new Point();
-        point.setX(posicaoMapa.getLatitude());
-        point.setY(posicaoMapa.getLongitude());
-        return isInside(polygon, point);
+        return isInside(polygon, new Point(posicaoMapa.getLatitude(), posicaoMapa.getLongitude()));
     }
 
     private boolean isInside(Polygon polygon, Point point){
-        return OperatorContains.local().execute(polygon, point, null, null) || OperatorTouches.local().execute(polygon, point, null, null);
+        Geometry simpleGeometry = OperatorSimplifyOGC.local().execute(polygon, null, true, null);
+        return OperatorContains.local().execute(simpleGeometry, point, null, null) || OperatorTouches.local().execute(polygon, point, null, null);
     }
 }

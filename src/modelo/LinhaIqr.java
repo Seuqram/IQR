@@ -44,6 +44,22 @@ public class LinhaIqr {
         fileWriter.close();
     }
 
+    public void writeBairrosInCsv(String filePath) throws IOException {
+        System.out.println(this.identificador);
+        FileWriter fileWriter = new FileWriter(filePath, true);
+
+        if (bairros != null) {
+            for (Bairro bairro : bairros) {
+                fileWriter.append(this.getIdentificador());
+                fileWriter.append(COMMA_DELIMITER);
+                fileWriter.append(bairro.getNome());
+                fileWriter.append(NEW_LINE_SEPARATOR);
+            }
+        }
+        fileWriter.flush();
+        fileWriter.close();
+    }
+
     public void writeIqrInCsv() throws IOException {
         String pattern = "### ###.###";
         DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.getDefault());
@@ -62,6 +78,28 @@ public class LinhaIqr {
             fileWriter.append(iqr.getDataHora().toString());
             fileWriter.append(COMMA_DELIMITER);
             fileWriter.append(df.format(iqr.getValor() * 100));
+            fileWriter.append(NEW_LINE_SEPARATOR);
+        }
+
+        fileWriter.flush();
+        fileWriter.close();
+    }
+
+    public void writeIqrInCsv(String filePath) throws IOException {
+        String pattern = "### ###.###";
+        DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.getDefault());
+        otherSymbols.setDecimalSeparator('.');
+        otherSymbols.setGroupingSeparator(' ');
+        DecimalFormat df = new DecimalFormat(pattern, otherSymbols);
+        System.out.println(this.identificador);
+        FileWriter fileWriter = new FileWriter(filePath, true);
+
+        for (ResultadoIQR iqr : iqrs) {
+            fileWriter.append(this.getIdentificador());
+            fileWriter.append(COMMA_DELIMITER);
+            fileWriter.append(iqr.getDataHora().toString());
+            fileWriter.append(COMMA_DELIMITER);
+            fileWriter.append(df.format(iqr.getValor() * 100d));
             fileWriter.append(NEW_LINE_SEPARATOR);
         }
 

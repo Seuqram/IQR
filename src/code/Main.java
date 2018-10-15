@@ -36,18 +36,20 @@ public class Main {
             Repositorio repositorio = new Repositorio("data");
             Map<String, Linha> identificadorLinhaMap = getLinhaMap(repositorio);
 
-            List<LinhaIqr> linhasComBairros = pegaLinhasComBairros(identificadorLinhaMap);
+
             List<LinhaIqr> linhasComIqrs = getLinhasComIqr(identificadorLinhaMap);
+            System.out.println("fim iqr");
+            pegaLinhasComBairros(identificadorLinhaMap, linhasComIqrs);
 
-            List<LinhaIqr> linhaIqrList = new ArrayList<>(linhasComIqrs);
+//            List<LinhaIqr> linhaIqrList = new ArrayList<>(linhasComIqrs);
 
-            linhaIqrList.forEach(linhaIqr -> {
-                linhasComBairros.stream().filter(linhaBairro -> linhaBairro.getIdentificador().equals(linhaIqr.getIdentificador())).collect(Collectors.toList())
-                        .forEach(linhaBairro -> linhaIqr.setBairros(linhaBairro.getBairros()));
-            });
-            for (LinhaIqr linhaIqr : linhaIqrList) {
-                linhaIqr.writeIqrInCsv();
-                linhaIqr.writeBairrosInCsv();
+//            linhasComIqrs.forEach(linhaIqr -> {
+//                linhasComBairros.stream().filter(linhaBairro -> linhaBairro.getIdentificador().equals(linhaIqr.getIdentificador())).collect(Collectors.toList())
+//                        .forEach(linhaBairro -> linhaIqr.setBairros(linhaBairro.getBairros()));
+//            });
+            for (LinhaIqr linhaIqr : linhasComIqrs) {
+//                linhaIqr.writeIqrInCsv("iqr.csv");
+                linhaIqr.writeBairrosInCsv("bairro.csv");
             }
 
         } catch (IOException | SAXException | ParserConfigurationException e) {
@@ -70,33 +72,59 @@ public class Main {
         return map;
     }
 
+    private static void pegaLinhasComBairros(Map<String, Linha> identificadorLinhaMap, List<LinhaIqr> linhaList) throws IOException, SAXException, ParserConfigurationException {
+        List<Bairro> bairros = getListaBairros();
+        VerificadorPoligono verificadorPoligono = VerificadorPoligono.getInstance();
+        linhaList.parallelStream().forEach(linhaIqr -> {
+            System.out.println("Bairros de " + linhaIqr.getIdentificador());
+            Linha linha = identificadorLinhaMap.get(linhaIqr.getIdentificador());
+            List<PosicaoMapa> list = new ArrayList<>();
+            for (PosicaoMapa posicaoMapa : linha.getTrajetoCompleto().pegaPosicoes()) {
+                list.add(posicaoMapa);
+            }
+            list.parallelStream().forEach(posicaoMapa -> {
+//                List<Bairro> bsq =
+                bairros.stream().
+                        filter(bairro -> verificadorPoligono.isInside(bairro.getPolygon(), posicaoMapa))
+                        .collect(Collectors.toList())
+                        .forEach(linhaIqr::addBairro);
+            });
+        });
+    }
+
     private static List<LinhaIqr> pegaLinhasComBairros(Map<String, Linha> identificadorLinhaMap) throws IOException, SAXException, ParserConfigurationException {
         List<Bairro> bairros = getListaBairros();
         List<LinhaIqr> linhasList = new ArrayList<>();
-        int numeroLinhas = identificadorLinhaMap.size();
-        int contadorLinhas = 0;
-        for (Map.Entry<String, Linha> entry : identificadorLinhaMap.entrySet()) {
+        identificadorLinhaMap.entrySet().parallelStream().forEach(entry -> {
             String identificadorLinha = entry.getKey();
             Linha linha = entry.getValue();
+            VerificadorPoligono verificadorPoligono = VerificadorPoligono.getInstance();
 
-            System.out.println("Linha " + ++contadorLinhas + "/" + numeroLinhas);
+            Set<Bairro> bairrosMapeados = new HashSet<>();
+
+            System.out.println("Linha :" + identificadorLinha);
 
             LinhaIqr linhaIqr = new LinhaIqr();
             linhaIqr.setIdentificador(identificadorLinha);
-            for (PosicaoMapa posicaoMapa : linha.getTrajetoIda().pegaPosicoes()) {
-                VerificadorPoligono verificadorPoligono = VerificadorPoligono.getInstance();
-                bairros.stream()
-                        .filter(bairro -> verificadorPoligono.isInside(bairro.getPolygon(), posicaoMapa)).collect(Collectors.toList())
-                        .forEach(linhaIqr::addBairro);
+            List<PosicaoMapa> list = new ArrayList<>();
+            for (PosicaoMapa posicaoMapa : linha.getTrajetoCompleto().pegaPosicoes()) {
+                list.add(posicaoMapa);
             }
-            for (PosicaoMapa posicaoMapa : linha.getTrajetoVolta().pegaPosicoes()) {
-                VerificadorPoligono verificadorPoligono = VerificadorPoligono.getInstance();
-                bairros.stream()
-                        .filter(bairro -> verificadorPoligono.isInside(bairro.getPolygon(), posicaoMapa)).collect(Collectors.toList())
-                        .forEach(linhaIqr::addBairro);
-            }
+            list.parallelStream().forEach(posicaoMapa -> {
+                List<Bairro> bsq = bairros.stream().filter(bairro -> !bairrosMapeados.contains(bairro))
+                        .filter(bairro -> verificadorPoligono.isInside(bairro.getPolygon(), posicaoMapa))
+                        .collect(Collectors.toList());
+//                List<Bairro> bsq = bairros.stream()
+//                        .filter(bairro -> verificadorPoligono.isInside(bairro.getPolygon(), posicaoMapa))
+//                        .collect(Collectors.toList());
+                bsq.forEach(bairro -> {
+                    linhaIqr.addBairro(bairro);
+                    bairrosMapeados.add(bairro);
+                });
+//                bsq.forEach(linhaIqr::addBairro);
+            });
             linhasList.add(linhaIqr);
-        }
+        });
         return linhasList;
     }
 
@@ -110,9 +138,7 @@ public class Main {
         MeuCalculadorIQR calculador = MeuCalculadorIQR.getInstance();
         BaixadorPosicaoVeiculos baixador = new BaixadorPosicaoVeiculos();
 
-        for (int index = 0; index < quantidadeArquivosComPosicoes; index++) {
-            String nomeArquivoComPosicoes = arquivosComPosicoesList.get(index);
-            System.out.println((index + 1) + "/" + quantidadeArquivosComPosicoes + " - inicio");
+        arquivosComPosicoesList.parallelStream().forEach(nomeArquivoComPosicoes -> {
             LocalDateTime dataHora = null;
             try {
                 LocalDate day = LocalDate.parse(nomeArquivoComPosicoes.substring(6, nomeArquivoComPosicoes.length() - 4).substring(0, 10));
@@ -120,7 +146,7 @@ public class Main {
                 int minuto = Integer.valueOf(nomeArquivoComPosicoes.substring(20, 22));
                 int segundo = Integer.valueOf(nomeArquivoComPosicoes.substring(23, 25));
                 dataHora = day.atTime(hora, minuto, segundo);
-            } catch (Exception e){
+            } catch (Exception e) {
                 System.out.println();
             }
             try {
@@ -128,29 +154,34 @@ public class Main {
                 InputStream input = arquivoZipado.getInputStream(arquivoZipado.entries().nextElement());
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(input));
                 ConjuntoLinhas conjuntoLinhas = baixador.carrega(bufferedReader);
+                List<Linha> linhaList = new ArrayList<>();
+
                 for (Linha linha : conjuntoLinhas.getLinhas()) {
                     if (identificadorLinhaMap.containsKey(linha.getIdentificador())) {
                         if (linha.contaVeiculos() > 2) {
-                            for (PosicaoMapa posicaoMapa : identificadorLinhaMap.get(linha.getIdentificador()).getTrajetoIda().pegaPosicoes()) {
-                                linha.getTrajetoIda().adiciona(posicaoMapa);
-                            }
-                            for (PosicaoMapa posicaoMapa : identificadorLinhaMap.get(linha.getIdentificador()).getTrajetoVolta().pegaPosicoes()) {
-                                linha.getTrajetoVolta().adiciona(posicaoMapa);
-                            }
-                            ResultadoIQR resultado = new ResultadoIQR();
-                            resultado.setDataHora(dataHora);
-                            resultado.setValor(calculador.executa(linha));
-                            linhaIqrMap.putIfAbsent(linha.getIdentificador(), new ArrayList<>());
-                            linhaIqrMap.get(linha.getIdentificador()).add(resultado);
-
+                            linhaList.add(linha);
                         }
                     }
-
                 }
+
+                LocalDateTime finalDataHora = dataHora;
+                linhaList.parallelStream().forEach(linha -> {
+                    for (PosicaoMapa posicaoMapa : identificadorLinhaMap.get(linha.getIdentificador()).getTrajetoIda().pegaPosicoes()) {
+                        linha.getTrajetoIda().adiciona(posicaoMapa);
+                    }
+                    for (PosicaoMapa posicaoMapa : identificadorLinhaMap.get(linha.getIdentificador()).getTrajetoVolta().pegaPosicoes()) {
+                        linha.getTrajetoVolta().adiciona(posicaoMapa);
+                    }
+                    ResultadoIQR resultado = new ResultadoIQR();
+                    resultado.setDataHora(finalDataHora);
+                    resultado.setValor(calculador.executa(linha));
+                    linhaIqrMap.putIfAbsent(linha.getIdentificador(), new ArrayList<>());
+                    linhaIqrMap.get(linha.getIdentificador()).add(resultado);
+                });
             } catch (IOException e) {
                 System.out.println("Exceção na extração do arquivo " + nomeArquivoComPosicoes);
             }
-        }
+        });
         List<LinhaIqr> linhaIqrList = new ArrayList<>();
         for (Map.Entry<String, List<ResultadoIQR>> entry : linhaIqrMap.entrySet()) {
             String identificadorLinha = entry.getKey();
@@ -192,18 +223,19 @@ public class Main {
 
     private static List<Point> getPontoList(String coordenadas) {
         List<Point> pontos = new ArrayList<>();
-        String[] pontoSeparado = new String[2];
+//        String[] pontoSeparado = new String[2];
         int i = 0;
         for (String coordenada : coordenadas.split(",")) {
             String[] vetorCoordenadas = coordenada.split(" ");
             if (vetorCoordenadas.length > 1) {
                 pontos.add(getPonto(vetorCoordenadas));
-            } else {
-                pontoSeparado[i] = vetorCoordenadas[0];
-                i++;
             }
+//            else {
+//                pontoSeparado[i] = vetorCoordenadas[0];
+//                i++;
+//            }
         }
-        pontos.add(getPonto(pontoSeparado));
+//        pontos.add(getPonto(pontoSeparado));
         return pontos;
     }
 
